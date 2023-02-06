@@ -17,3 +17,7 @@ Optimizing the convergence of NEGF will allow it to be used by industry as the c
 ## Process
 
 ![ML_NEGF](diagrams/mode_of_operation-Page-1.svg "Mode of operation")
+
+## Input
+
+![Charge_NEGF](diagrams/charge_distribution.png "Charge distro")
