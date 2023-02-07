@@ -8,7 +8,7 @@ class AE(torch.nn.Module):
         # layer followed by Relu activation function
         # 784 ==> 9
         self.encoder = torch.nn.Sequential(
-            torch.nn.Linear(28 * 28, 128),
+            torch.nn.Linear(26 * 26, 128),
             torch.nn.ReLU(),
             torch.nn.Linear(128, 64),
             torch.nn.ReLU(),
