@@ -2,18 +2,16 @@ import matplotlib.pyplot as plt
 
 import matplotlib.colors as colors
 import numpy as np
-my_data = np.genfromtxt('test.csv', delimiter=',', skip_header=True)
 
-
+my_data = np.loadtxt('data_3x3_10/ml_res/NEGF_0.33125_0.05_54_tar.txt')
+print(my_data.shape)
 fig, ax = plt.subplots(figsize=(6,12))
-test_data = my_data[:,0]
-data = test_data.reshape(71,26, order='F')
-pos = ax.imshow(data, cmap='viridis', interpolation='bilinear')
+pos = ax.imshow(my_data, cmap='viridis', interpolation='bilinear')
 c_bar = fig.colorbar(pos, ax=ax)
 
 
 ax.set_xlabel("X [nm]")
 ax.set_ylabel("Y [nm]")
-c_bar.set_label("e")
-plt.tight_layout()
+c_bar.set_label("1/cm3")
+# plt.tight_layout()
 plt.show()

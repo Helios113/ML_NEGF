@@ -20,4 +20,31 @@ Optimizing the convergence of NEGF will allow it to be used by industry as the c
 
 ## Input
 
-![Charge_NEGF](diagrams/charge_distribution.png "Charge distro")
+![Charge_NEGF](diagrams/charge_distribution.png "Charge distro" )
+
+
+## Network
+
+This is based on autoencoders, we avoid denoising autoencoders because there is no issue with achieving the identity operation.
+
+## Resizing?
+How to make sure that any cross section of a device will work?
+
+- The device is always rectangular and if not, we can pad it out to be with 0s
+- Then we need to make it into the same size square
+- The idea is that we can condense any shape into a square and we can train the network that padding is always padding. This means that we will reduce the accuracy
+- Maybe we can exclude the padding from the loss function
+- However, it again all boils down to resolution, but ideally we don't need much resolution.
+
+
+So the plan:
+
+```
+1 1 1    1 1 1     4/3 4/3 4/3 
+1 1 1 vs 1 1 1 ->  4/3 4/3 4/3
+1 1 1    1 1 1     4/3 4/3 4/3
+         1 1 1 
+```
+
+Integral of the charge over are divided by unit area;
+In the case above the field has a value of 1 same as with the original, but the area we are looking at is larger, (1 x 4/3), so the integral is 1x1x4/3 = 4/3. This is then divided by unit area 1 = 4/3. Ok this is cool.
