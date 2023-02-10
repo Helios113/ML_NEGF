@@ -21,6 +21,7 @@ class NEFG3x3Set(Dataset):
         self.root_dir = root_dir
         self.data_dir = root_dir+"/"+data_folder
         self.transform = transform
+        self.tens = transforms.ToTensor()
         self.labels = pd.read_csv(root_dir+"/"+csv_file)
 
     def __len__(self):
@@ -32,15 +33,9 @@ class NEFG3x3Set(Dataset):
 
         inp_name = os.path.join(self.data_dir, self.labels.iloc[idx, 0])
         tar_name = os.path.join(self.data_dir, self.labels.iloc[idx, 1])
-
-        inp = np.loadtxt(inp_name)
-        tar = np.loadtxt(tar_name)
-        if self.transform:
-            mean, std = inp.mean(), inp.std()
-            transform_norm = transforms.Compose([
-                                transforms.ToTensor(),
-                                transforms.Normalize(mean, std)
-                                ])
-            inp = transform_norm(inp)
-            tar = transform_norm(tar)
-        return inp, tar, (mean, std)
+        
+        
+        inp = self.tens(np.loadtxt(inp_name))
+        tar = self.tens(np.loadtxt(tar_name))
+        
+        return inp, tar
