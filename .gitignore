@@ -1,2 +1,4 @@
 *.pyc
 **/data*
+**/rec_data*
+*tar.gz

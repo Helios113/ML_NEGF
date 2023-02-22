@@ -11,7 +11,7 @@ optimizer = torch.optim.Adam(model.parameters(),
                              lr=1e-3)
 
 data: 0-1 for whole device
-
+Sigmoid
 
 ## Exp 3
 loss_function = torch.nn.MSELoss()  
@@ -31,13 +31,14 @@ optimizer = torch.optim.Adam(model.parameters(),
 data: mean 0, 1 std
 Tanh
 
-## Exp 4
-loss_function = torch.nn.MSELoss()  
+## Exp 5
+loss_function = Relative Loss
 optimizer = torch.optim.Adam(model.parameters(),
                              lr=1e-4)
 
 data: mean 0, 1 std
-Relu
+Sigmoid
+
 
 
 

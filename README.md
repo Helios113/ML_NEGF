@@ -48,3 +48,8 @@ So the plan:
 
 Integral of the charge over are divided by unit area;
 In the case above the field has a value of 1 same as with the original, but the area we are looking at is larger, (1 x 4/3), so the integral is 1x1x4/3 = 4/3. This is then divided by unit area 1 = 4/3. Ok this is cool.
+
+
+Convergence is a bit of an issue. We train the models, however, the accuracy for small numbers is bad. In essence, we have a portion of the dataset in the range 1e5 and another in the range 1e-5, so the model trains well on the large data and poorly on the small data because the loss is much smaller.
+
+Potential solution: Custom loss function. Something like relative loss. (Tar/Pred) 

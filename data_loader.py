@@ -22,7 +22,7 @@ class NEFG3x3Set(Dataset):
         self.data_dir = root_dir+"/"+data_folder
         self.transform = transform
         self.tens = transforms.ToTensor()
-        self.labels = pd.read_csv(root_dir+"/"+csv_file)
+        self.labels = pd.read_csv(root_dir+"/"+csv_file, header=None)
 
     def __len__(self):
         return len(self.labels)
@@ -38,4 +38,5 @@ class NEFG3x3Set(Dataset):
         inp = self.tens(np.loadtxt(inp_name))
         tar = self.tens(np.loadtxt(tar_name))
         
-        return inp, tar
+        
+        return inp, tar, self.labels.iloc[idx, 0], self.labels.iloc[idx, 2], self.labels.iloc[idx, 3]
