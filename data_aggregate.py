@@ -7,16 +7,19 @@ import csv
 import matplotlib.pyplot as plt
 
 
-res_dir = 'data/3x12_16'
-img_dir = res_dir+'/ml_res'
-cond_dir = res_dir+'/dat_pot_10_std'
+target = "charge"
+name = "3x12_16_damp00"
 
-info_file = open(res_dir+'/info_dat_pot_10_std.csv', 'w+')
+res_dir = 'data'
+img_dir = res_dir+'/ml_test'
+cond_dir = res_dir+"/"+name+'/dat_'+target
+
+info_file = open(res_dir+"/"+name+'/info_dat_{tar}.csv'.format(tar=target), 'w+')
 writer = csv.writer(info_file)
 
 
-inp_suffix = "_pot_inp.txt"
-tar_suffix = "_pot_tar.txt"
+inp_suffix = "_{target}_1.txt".format(target=target)
+tar_suffix = "_{target}_{index}.txt".format(target=target, index = "{index}")
 
 np.seterr(all='raise')
 files = [f for f in listdir(img_dir) if isfile(join(img_dir, f))]
@@ -29,6 +32,8 @@ files.sort()
 unique_names = set()
 for f in files:
     unique_names.add("_".join(f.split("_", 3)[:3]))
+
+# print(unique_names)
 
 inp = np.array([])
 data = {}
@@ -46,7 +51,9 @@ for j in unique_names:
         
     # CONDITIONING
     # ################
-    inp = np.power(10, inp)
+    inp = np.log10(inp)
+    # inp = np.power(10, inp)
+    
     
     # #################
     if inp.size != 0:
@@ -59,25 +66,52 @@ for j in unique_names:
     inp = np.array([])
     
 
-for f in files:
-    for i in data.keys():
-        if f.startswith(i) and (f.endswith(inp_suffix) or f.endswith(tar_suffix)):
-            j = data[i]
-            # np.savetxt(join(cond_dir, f),(np.loadtxt(join(img_dir, f))-j[1])/(j[0]-j[1]))
-            try:
-                np.savetxt(join(cond_dir, f), (np.power(10, np.loadtxt(join(img_dir, f)))-j[1])/(j[0]-j[1]))
-            except Exception as e:
-                print(np.loadtxt(join(img_dir, f)))
-                print(f)
-                print(e)
-                input()
+
+# find all files which have the correct begining and type
+# beggining with and contains, and get lat index, so basically split
+# then take the first, second and last for training
+
+
+name_max_index = {}
+
+for i in data.keys():
+    for f in files:    
+        if f.startswith(i) and target in f:
+            index = int(f.split("_")[-1][:-4])
+            if i+target in name_max_index:
+                name_max_index[i+target] = name_max_index[i+target] if name_max_index[i+target]>index else index
+            else:
+                name_max_index[i+target] = index
+  
+for i in data.keys():
+    # names = []
+    for f in files:    
+        if f.startswith(i):
+            if f.endswith(inp_suffix) or f.endswith(tar_suffix.format(index = 2)): # or ) :
+                j = data[i]
+                np.savetxt(join(cond_dir, f), (np.log10(np.loadtxt(join(img_dir, f)))-j[1])/(j[0]-j[1]))
+                # np.savetxt(join(cond_dir, f), (np.power(10, np.loadtxt(join(img_dir, f)))-j[1])/(j[0]-j[1]))
+                
+                # names.append(f)
+            elif f.endswith(tar_suffix.format(index = name_max_index[i+target])):
+                f1 = "_".join(f.split("_", 4)[:4])+tar_suffix.format(index = "tar")
+                j = data[i]
+                np.savetxt(join(cond_dir, f1), (np.log10(np.loadtxt(join(img_dir, f)))-j[1])/(j[0]-j[1]))
+                # np.savetxt(join(cond_dir, f1), (np.power(10, np.loadtxt(join(img_dir, f)))-j[1])/(j[0]-j[1]))
+                
+                # names.append(f1)
+
+
 
 for f in files:
     if f.endswith(inp_suffix):
         devId = "_".join(f.split("_", 3)[:3])
-        # print(devId)
-        tar = f.replace(inp_suffix, tar_suffix)
-        row = [f, tar, data[devId][0], data[devId][1]]
-        writer.writerow(row)
+        
+        cmp = "_".join(f.split("_", 4)[:4])+tar_suffix.format(index = 2)
+        tar = "_".join(f.split("_", 4)[:4])+tar_suffix.format(index = "tar")
+        
+        row = [f, cmp, tar, data[devId][0], data[devId][1]]
+        writer.writerow(row)    
 
 info_file.close()
+#  NEGF_0.51875_0.51875_75_charge_10.txt
