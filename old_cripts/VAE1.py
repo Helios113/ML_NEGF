@@ -7,6 +7,8 @@ class AE(nn.Module):
     def __init__(self, in_channels: int, hidden_dims: list, latent_dim: int):
         super().__init__()
 
+
+        self.input_channels = in_channels
         modules = []
         self.h_dims = hidden_dims
         # Build Encoder
@@ -14,14 +16,16 @@ class AE(nn.Module):
             modules.append(
                 nn.Sequential(
                     nn.Conv2d(in_channels, out_channels=h_dim,
-                            kernel_size=3, stride=1, padding=0),
-                    nn.LeakyReLU())
+                            kernel_size=5, stride=1, padding=0),
+                    nn.ReLU())
             )
             in_channels = h_dim
 
         self.encoder = nn.Sequential(*modules)
-        # self.latent_layer = nn.Linear(hidden_dims[-1]*3, latent_dim)
-        # self.decoding_layer = nn.Linear(latent_dim, in_channels*3)
+        
+        # This need to give the same size as the whole convnet
+        self.res1 = nn.Conv2d(self.input_channels, out_channels=hidden_dims[-1],
+                            kernel_size=5*(len(hidden_dims)), stride=1, padding=0)
         
         modules = []
         hidden_dims.reverse()
@@ -30,28 +34,28 @@ class AE(nn.Module):
                 nn.Sequential(
                     nn.ConvTranspose2d(hidden_dims[i],
                                        hidden_dims[i + 1],
-                                       kernel_size=3,
+                                       kernel_size=5,
                                        stride=1,
                                        padding=0,
                                        output_padding=0),
-                    nn.LeakyReLU())
+                    nn.ReLU())
             )
         modules.append(
                 nn.Sequential(
                     nn.ConvTranspose2d(hidden_dims[-1],
                                        1,
-                                       kernel_size=3,
+                                       kernel_size=5,
                                        stride=1,
                                        padding=0,
-                                       output_padding=0),
-                    nn.LeakyReLU()
+                                       output_padding=0)
                     # nn.Conv2d(hidden_dims[-1], out_channels=hidden_dims[-1],
                     #         kernel_size=5, stride=1, padding=1))
                 )
             )
         
         self.decoder = nn.Sequential(*modules)
-        
+        self.res2 = nn.ConvTranspose2d(hidden_dims[0], out_channels=self.input_channels,
+                            kernel_size=5*(len(hidden_dims)-1), stride=1, padding=0)
         
         self.fc_mu = nn.Conv2d(hidden_dims[0],
                                        hidden_dims[0],
@@ -67,7 +71,11 @@ class AE(nn.Module):
         :param input: (Tensor) Input tensor to encoder [N x C x H x W]
         :return: (Tensor) List of latent codes
         """
-        result = self.encoder(input)
+
+        # print(self.encoder(input).shape)
+        # print(self.res1(input).shape)
+
+        result = self.encoder(input)#+self.res1(input)
       
 
         # Split the result into mu and var components
@@ -84,7 +92,7 @@ class AE(nn.Module):
         :param z: (Tensor) [B x D]
         :return: (Tensor) [B x C x H x W]
         """
-        result = self.decoder(z)
+        result = self.decoder(z)#+self.res2(z)
         return result
 
     def reparameterize(self, mu, logvar):

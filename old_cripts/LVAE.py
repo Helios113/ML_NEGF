@@ -195,8 +195,8 @@ class LVAE(nn.Module):
                     log_var_1,
                     log_var_2):
 
-        p_1 = 1. / (log_var_1.exp() + 1e-7)
-        p_2 = 1. / (log_var_2.exp() + 1e-7)
+        p_1 = 1. / (log_var_1.exp())
+        p_2 = 1. / (log_var_2.exp())
 
         mu = (mu_1 * p_1 + mu_2 * p_2)/(p_1 + p_2)
         log_var = torch.log(1./(p_1 + p_2))
@@ -233,7 +233,7 @@ class LVAE(nn.Module):
         recons, kl_div = self.decode(z, post_params)
 
         #kl_div += -0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim = 1)
-        return [recons, input, kl_div]
+        return [recons+input, input, kl_div]
 
     def loss_function(self,
                       *args,
