@@ -9,7 +9,7 @@ import numpy as np
 
 class NEFG3x3Set(Dataset):
 
-    def __init__(self, csv_file, root_dir, data_folder, transform=False, device='cuda:0'):
+    def __init__(self, csv_file, root_dir, data_folder, transform=False, device="mps"):
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
@@ -36,8 +36,7 @@ class NEFG3x3Set(Dataset):
         cmp_name = os.path.join(self.data_dir, self.labels.iloc[idx, 1])
         tar_name = os.path.join(self.data_dir, self.labels.iloc[idx, 2])
 
-        inp = self.tens(np.loadtxt(inp_name)).to(self.device)
-        cmp = self.tens(np.loadtxt(cmp_name)).to(self.device)
-        tar = self.tens(np.loadtxt(tar_name)).to(self.device)
-
+        inp = self.tens(np.loadtxt(inp_name, dtype="float32")).to(self.device)
+        cmp = self.tens(np.loadtxt(cmp_name, dtype="float32")).to(self.device)
+        tar = self.tens(np.loadtxt(tar_name, dtype="float32")).to(self.device)
         return inp, cmp, tar, self.labels.iloc[idx, 0], self.labels.iloc[idx, 3], self.labels.iloc[idx, 4]

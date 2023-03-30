@@ -17,8 +17,14 @@ from data_loader import NEFG3x3Set
 """
 Determine if any GPUs are available
 """
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+if torch.cuda.is_available():
+    device = "cuda" # NVIDIA GPU
+elif torch.backends.mps.is_available():
+    device = "mps" # Apple GPU
+else:
+    device = "cpu" # Defaults to CPU if NVIDIA GPU/Apple GPU aren't available
 
+print(f"Using device: {device}")
 
 
 """
@@ -95,7 +101,7 @@ Create dataloaders to feed data into the neural network
 Default MNIST dataset is used and standard train/test split is performed
 """
 dataset = NEFG3x3Set("info_dat_charge.csv",
-                     "data/3x12_16_damp00", "dat_charge", transform=True)
+                     "data/3x12_16_damp00", "dat_charge", transform=True, device=device)
 
 length = len(dataset)
 train_split = math.floor(length*.7)
