@@ -9,19 +9,12 @@ import numpy as np
 
 class NEFG3x3Set(Dataset):
 
-    def __init__(self, csv_file, root_dir, data_folder, transform=False, device="mps"):
-        """
-        Args:
-            csv_file (string): Path to the csv file with annotations.
-            root_dir (string): Directory with all the images.
-            transform (callable, optional): Optional transform to be applied
-                on a sample.
-        """
+    def __init__(self, csv_file, root_dir, data_folder, shape = (111,71), device="mps"):
+
         # self.landmarks_frame = pd.read_csv(csv_file)
         self.root_dir = root_dir
+        self.shape = shape
         self.data_dir = root_dir+"/"+data_folder
-        self.transform = transform
-        self.tens = transforms.ToTensor()
         self.labels = pd.read_csv(root_dir+"/"+csv_file, header=None)
         self.device = device
 
@@ -32,11 +25,27 @@ class NEFG3x3Set(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        inp_name = os.path.join(self.data_dir, self.labels.iloc[idx, 0])
-        cmp_name = os.path.join(self.data_dir, self.labels.iloc[idx, 1])
-        tar_name = os.path.join(self.data_dir, self.labels.iloc[idx, 2])
+        dat = []
+        imp = torch.stack((
+            torch.from_numpy(np.loadtxt(os.path.join(self.data_dir,str(self.labels.iloc[idx, 0])), dtype="float32")).to(self.device),
+            torch.from_numpy(np.loadtxt(os.path.join(self.data_dir,str(self.labels.iloc[idx, 1])), dtype="float32")).to(self.device),
+            torch.full(self.shape,self.labels.iloc[idx, 10]).to(self.device),
+            torch.full(self.shape,self.labels.iloc[idx, 11]).to(self.device),
+            torch.full(self.shape,self.labels.iloc[idx, 12]).to(self.device),
+            torch.arange(0,self.shape[0]).reshape(self.shape[0], 1).expand(self.shape[0], self.shape[1]).to(self.device)
+            # torch.arange(0,self.shape[0]*self.shape[1]).view(self.shape).to(self.device)
+        ), dim = 0)
+        dat.append(imp)
 
-        inp = self.tens(np.loadtxt(inp_name, dtype="float32")).to(self.device)
-        cmp = self.tens(np.loadtxt(cmp_name, dtype="float32")).to(self.device)
-        tar = self.tens(np.loadtxt(tar_name, dtype="float32")).to(self.device)
-        return inp, cmp, tar, self.labels.iloc[idx, 0], self.labels.iloc[idx, 3], self.labels.iloc[idx, 4]
+        # self.labels.iloc[idx, 2] =  self.labels.iloc[idx, 2][:-5]+"3.txt"
+        # self.labels.iloc[idx, 3] =  self.labels.iloc[idx, 2][:-5]+"3.txt"
+
+        # print(self.labels.iloc[idx, 2])
+        for i in range(4):
+            dat.append(torch.from_numpy(np.loadtxt(os.path.join(self.data_dir,str(self.labels.iloc[idx, i+2])), dtype="float32")).to(self.device))
+
+        return dat
+    
+# dataset = NEFG3x3Set("info_dat_std_NEGFXY.csv",
+#                      "data/3x12_16_damp00", "dat_std")
+# dataset[0]

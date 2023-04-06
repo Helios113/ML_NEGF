@@ -18,11 +18,12 @@ info_file = open(res_dir+"/"+name+'/info_dat_{tar}.csv'.format(tar=target), 'w+'
 writer = csv.writer(info_file)
 
 
+target_prefix = "NEGFZX"
 inp_suffix = "_{target}_1.txt".format(target=target)
 tar_suffix = "_{target}_{index}.txt".format(target=target, index = "{index}")
 
 np.seterr(all='raise')
-files = [f for f in listdir(img_dir) if isfile(join(img_dir, f))]
+files = [f for f in listdir(img_dir) if isfile(join(img_dir, f)) and f.startswith(target_prefix)]
 
 files.sort()
 # print(files)
@@ -40,6 +41,7 @@ data = {}
 for j in unique_names:
     for f in files:
         if f.startswith(j) and f.endswith(inp_suffix):
+            # print(f)
             dat = np.loadtxt(join(img_dir, f)).flatten()
             if not np.isnan(dat).any():
                 inp = np.concatenate((inp,dat))
@@ -88,17 +90,28 @@ for i in data.keys():
     for f in files:    
         if f.startswith(i):
             if f.endswith(inp_suffix) or f.endswith(tar_suffix.format(index = 2)): # or ) :
-                j = data[i]
-                np.savetxt(join(cond_dir, f), (np.log10(np.loadtxt(join(img_dir, f)))-j[1])/(j[0]-j[1]))
+                # j = data[i]
+                np.savetxt(join(cond_dir, f), (np.log10(np.loadtxt(join(img_dir, f)))))#-j[1])/(j[0]-j[1]))
                 # np.savetxt(join(cond_dir, f), (np.power(10, np.loadtxt(join(img_dir, f)))-j[1])/(j[0]-j[1]))
+                # np.savetxt(join(cond_dir, f), (np.loadtxt(join(img_dir, f))))
+
+                # j=np.loadtxt(join(img_dir, f))
+                # j = (j-j.min())/(j.max()-j.min())
+                # np.savetxt(join(cond_dir, f), j)
+
                 
                 # names.append(f)
             elif f.endswith(tar_suffix.format(index = name_max_index[i+target])):
                 f1 = "_".join(f.split("_", 4)[:4])+tar_suffix.format(index = "tar")
                 j = data[i]
-                np.savetxt(join(cond_dir, f1), (np.log10(np.loadtxt(join(img_dir, f)))-j[1])/(j[0]-j[1]))
+                np.savetxt(join(cond_dir, f1), (np.log10(np.loadtxt(join(img_dir, f)))))#-j[1])/(j[0]-j[1]))
                 # np.savetxt(join(cond_dir, f1), (np.power(10, np.loadtxt(join(img_dir, f)))-j[1])/(j[0]-j[1]))
-                
+                # np.savetxt(join(cond_dir, f1), (np.loadtxt(join(img_dir, f))))
+
+                # j=np.loadtxt(join(img_dir, f))
+                # j = (j-j.min())/(j.max()-j.min())
+                # np.savetxt(join(cond_dir, f1), j)
+
                 # names.append(f1)
 
 
@@ -106,11 +119,14 @@ for i in data.keys():
 for f in files:
     if f.endswith(inp_suffix):
         devId = "_".join(f.split("_", 3)[:3])
-        
+        vd = f.split("_", 4)[1]
+        vg = f.split("_", 4)[2]
+        loc = f.split("_", 4)[3]
+
         cmp = "_".join(f.split("_", 4)[:4])+tar_suffix.format(index = 2)
         tar = "_".join(f.split("_", 4)[:4])+tar_suffix.format(index = "tar")
         
-        row = [f, cmp, tar, data[devId][0], data[devId][1]]
+        row = [f, cmp, tar, data[devId][0], data[devId][1], vd, vg, loc]
         writer.writerow(row)    
 
 info_file.close()

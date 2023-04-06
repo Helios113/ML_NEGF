@@ -6,39 +6,21 @@ from AE import AE
 from AE import CustomLoss
 import matplotlib.pyplot as plt
 
-
-import numpy as np
-# from IPython.display import clear_output
-from datetime import datetime
-from color import color
-
-# plt.switch_backend('QtAgg4')
-
-info_file = ""
-data_folder = ""
-test_folder = ""
-save_file = ""
-fig_file = ""
-if len(sys.argv) == 6:
-    info_file = sys.argv[1]
-    data_folder = sys.argv[2]
-    test_folder = sys.argv[3]
-    save_file = sys.argv[4]
-    fig_file = sys.argv[5]
-else:
-    print("Error in arguments")
-    exit()
-    
-        
-    
-
+"""
+Determine if any GPUs are available
+"""
 if torch.cuda.is_available():
-    dev = "cuda:0"
+    device = "cuda" # NVIDIA GPU
+elif torch.backends.mps.is_available():
+    device = "mps" # Apple GPU
 else:
-    dev = "cpu"
+    device = "cpu" # Defaults to CPU if NVIDIA GPU/Apple GPU aren't available
 
-device = torch.device(dev)
-torch.cuda.set_device(0)
+print(f"Using device: {device}")
+
+
+device = torch.device(device)
+
 
 dataset = NEFG3x3Set(info_file, data_folder,
                      test_folder, transform=True)
