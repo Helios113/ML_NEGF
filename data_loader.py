@@ -32,7 +32,8 @@ class NEFG3x3Set(Dataset):
             torch.full(self.shape,self.labels.iloc[idx, 10]).to(self.device),
             torch.full(self.shape,self.labels.iloc[idx, 11]).to(self.device),
             torch.full(self.shape,self.labels.iloc[idx, 12]).to(self.device),
-            torch.arange(0,self.shape[0]).reshape(self.shape[0], 1).expand(self.shape[0], self.shape[1]).to(self.device)
+            (torch.arange(0,self.shape[0]).reshape(self.shape[0], 1).expand(self.shape[0], self.shape[1])/self.shape[0]).to(self.device),
+            (torch.arange(0,self.shape[1]).reshape(1,self.shape[1]).expand(self.shape[0], self.shape[1])/self.shape[1]).to(self.device)
             # torch.arange(0,self.shape[0]*self.shape[1]).view(self.shape).to(self.device)
         ), dim = 0)
         dat.append(imp)
@@ -46,6 +47,7 @@ class NEFG3x3Set(Dataset):
 
         return dat
     
-# dataset = NEFG3x3Set("info_dat_std_NEGFXY.csv",
-#                      "data/3x12_16_damp00", "dat_std")
-# dataset[0]
+# Normalise works
+# Res-connection 
+# No x - maybe
+# Reparam - defo not
