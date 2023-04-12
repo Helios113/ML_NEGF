@@ -1,0 +1,4 @@
+test loss < cmp loss @ 335
+Cmp loss                :0.0034403805766487494
+Min test loss           :0.0027347834111424163
+Min test loss at epoch  :468
