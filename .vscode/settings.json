@@ -3,5 +3,5 @@
         "autoencoders"
     ],
     "python.analysis.typeCheckingMode": "basic",
-    "todo-tree.tree.showBadges": false
+    "todo-tree.tree.showBadges": false,
 }

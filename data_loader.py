@@ -68,5 +68,6 @@ class NEFGSet(Dataset):
         for i in range(4):
             dat.append(torch.from_numpy(np.loadtxt(os.path.join(self.data_dir, str(
                 self.labels.iloc[idx, i+2])), dtype="float32")).to(self.device))
-
+        for i in range(7):
+             dat.append(self.labels.iloc[idx, i+6])
         return dat
