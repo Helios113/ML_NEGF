@@ -39,9 +39,11 @@ class Aggregator:
         df = pd.DataFrame(imgs,columns=['Plane','VG','VD','Location',"Type","Iteration","Criteria","Shape","Index"])
         self.dataframe = df
 
-    def query(self):
-        # Querys the array
-        pass
+    def find_max_tier(self, df, row):
+        df.query("Plane == '{}' and VG == '{}' and VD == '{}' and Location == '{} and Type == '{}' and Citeria == '{} and Shape == '{}'".format(
+            row["Plane"], row["VG"], row["VD"], row["Location"], row["Type"], row["Citeria"], row["Shape"]))
+        
+        return df.max("Iteration")
 
     def condition(self, df):
         # Condition should go through the entire self.array and condition based on the iteration number and data type
@@ -53,9 +55,14 @@ class Aggregator:
 
         for index, row in df.iterrows():
             if row["Type"] == "Charge":
-                np.log10(np.loadtxt(row["Index"]))
+                data = np.log10(np.loadtxt(row["Index"]))
+                chrg = 1
             else:
-                np.loadtxt(row["Index"])
+                data = np.loadtxt(row["Index"])
+                chrg = 0
+
+            norm[chrg][0] = data.mean()
+            norm[chrg][1] = data.std()
             
 
 
