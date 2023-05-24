@@ -33,28 +33,34 @@ files = [f for f in imgs if isfile(join(img_dir, f)) and f.startswith(target_pre
 unique_names = defaultdict(list)
 max_index = defaultdict(lambda: 0)
 for f in files :
-    key = "_".join(f.split("_", 3)[:3])
-    val = int(f.rsplit(".", 1)[0].split("_")[-1])
+    # NEGFZX_0.8_0.8_9_pot_8.txt
+    key = "_".join(f.split("_", 3)[:3])             # ANALYSIS_SHAPE_NEGFZX_0.8_0.8_LOC <-- 1
+    val = int(f.rsplit(".", 1)[0].split("_")[-1])   # 8
     # key1 = "_".join(f.split("_")[:4])
 
     unique_names[key].append(f)
     if max_index[key] < val:
         max_index[key] = val
 
+# Take each formatted parameters in from Kyle
+# 
+
 for key, val in unique_names.items():
-    val.sort()
+    val.sort() # Where val is NEGFZX_0.8_0.8_9_pot_8.txt
     matches = filter(lambda a : a.endswith(inp_suffix) , val)
     norm = [[0,0],[0,0]]
-    for v in val:
-        chrg = int("charge" in v)
+    for v in val: # val is a list
+        chrg = int("charge" in v) # find charge in v, 1 if found
         if v.endswith(inp_suffix):
             data = np.log10(np.loadtxt(join(img_dir, v))) if chrg == 1 else np.loadtxt(join(img_dir, v))
             norm[chrg][0] = data.mean()
             norm[chrg][1] = data.std()
             np.savetxt(join(cond_dir, v),(data-norm[chrg][0])/(norm[chrg][1]))
+
         if v.endswith(cmp_suffix) or v.endswith(tar_suffix.format(index=max_index[key])):
             data = np.log10(np.loadtxt(join(img_dir, v))) if chrg == 1 else np.loadtxt(join(img_dir, v))
             np.savetxt(join(cond_dir, v),(data-norm[chrg][0])/(norm[chrg][1]))
+
         if v.endswith(inp_suffix) and chrg == 0:
             v1 = v.replace("pot", "charge")
             vd = v.split("_", 4)[1]
@@ -67,5 +73,4 @@ for key, val in unique_names.items():
             tar_c = "_".join(v.split("_", 4)[:4])+"_charge"+tar_suffix.format(index=max_index[key])
             
             row = [v ,v1, cmp_p, cmp_c, tar_p, tar_c, norm[0][0], norm[0][1],norm[1][0],norm[1][1], vd, vg, loc]
-            writer.writerow(row)    
-        
+            writer.writerow(row)
