@@ -1,3 +1,4 @@
+import os
 from os import listdir
 import numpy as np
 from os.path import isfile, join
@@ -8,31 +9,48 @@ import matplotlib.pyplot as plt
 
 name = "3x12_16_damp00"
 
-res_dir = 'data'
-img_dir = res_dir+'/ml_test'
-cond_dir = res_dir+"/"+name+'/dat_std'
-
+#getting all files from all subdirectories and paths to said files
+imgs = []
+imgs_dir_dict = {}
 target_prefix = "NEGFXY"
+for root, dirs, files in os.walk("/home/kyle/ML_NEGF/main_data_dir"):
+    for name in files:
+      if name.startswith(target_prefix):
+        imgs.append(str(name))
+        imgs_dir_dict[name] = str(root).split("/")[-3:]
+
+print("\n")
+print("LIST OF IMGS:")
+print(imgs)
+print("\n")
+print("DICT OF IMG NAMES AND DIRECTORIES:")
+print(imgs_dir_dict)
+print("\n")
+
+
+res_dir = 'data'
+# img_dir = res_dir+'/ml_test'
+# cond_dir = res_dir+"/"+name+'/dat_std'
+#imgs = listdir(img_dir)
+
 table = "/info_dat_std_{nm}.csv".format(nm=target_prefix)
-info_file = open(res_dir+"/"+name+table, 'w+')
+info_file = open("res_dir"+"/"+name+table, 'w+')
 writer = csv.writer(info_file)
 
 
 inp_suffix = "_1.txt"
 cmp_suffix = "_4.txt"
-
 tar_suffix = "_{index}.txt"
 
-imgs = listdir(img_dir)
 
 np.seterr(all='raise')
-files = [f for f in imgs if isfile(join(img_dir, f)) and f.startswith(target_prefix)]
+#files = [f for f in imgs if isfile(join(img_dir, f)) and f.startswith(target_prefix)]
 
 
 # Find the same devices everywhere
 unique_names = defaultdict(list)
 max_index = defaultdict(lambda: 0)
-for f in files :
+for f in imgs:
     key = "_".join(f.split("_", 3)[:3])
     val = int(f.rsplit(".", 1)[0].split("_")[-1])
     # key1 = "_".join(f.split("_")[:4])
