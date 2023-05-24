@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+
 #getting all files from all subdirectories and paths to said files
 imgs = []
 name_as_lst = []

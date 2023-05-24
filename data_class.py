@@ -1,7 +1,8 @@
 import numpy as np
 from os.path import join
+import os
 import argparse
-import pandas
+import pandas as pd
 #import KYLES CODE
 
 class Aggregator:
@@ -9,21 +10,40 @@ class Aggregator:
         self.root = args.root
         self.target = args.target
 
-        self.array = np.array() # [plane, vg, vd, location, type, iter, filedir, shape, index]
+        self.dataframe = pd.DataFrame() # [plane, vg, vd, location, type, iter, filedir, shape, index]
 
         self.avgmappings = {'avg_cur':0,'abs_pot':1}
         self.planemappings = {'xy':0,'yz':1,'zx':2}
         self.typemappings = {'charge':0,'pot':1}
 
     def read(self):
-        # Kyles code
-        pass
+        #getting all files from all subdirectories and paths to said files
+        imgs = []
+        name_as_lst = []
+        VGnums = set()
+        VDnums = set()
+        target_prefix = "NEGFXY"
+
+        filenum = 0
+        filenames = []
+        for root, dirs, files in os.walk("/home/bailey/ML_NEGF/main_data_dir"):
+            for name in files:
+                if name.startswith(target_prefix):
+                    filenames.append(os.path.join(root, name))
+                    name = str(name).split(".txt")[0] #Removing .txt at end of strings
+                    name_as_lst = name.split("_")
+                    XY = name_as_lst.pop(0)[-2:]
+                    name_as_lst.insert(0,XY)
+                    imgs.append(name_as_lst + str(root).split("/")[-3:])
+
+        df = pd.DataFrame(imgs,columns=['Plane','VG','VD','Location',"Type","Iteration","Criteria","Shape","Index"])
+        self.dataframe = df
 
     def query(self):
         # Querys the array
         pass
 
-    def condition(self):
+    def condition(self, df):
         # Condition should go through the entire self.array and condition based on the iteration number and data type
         # Get all entries with iterator == 1
 
@@ -31,22 +51,12 @@ class Aggregator:
         norm = [[0,0],[0,0]]
         unique_devices = df.query("Iterator == '1'")
 
-        
         for index, row in df.iterrows():
-            maxIter = find_max_iter(device)
-            filepath = device.filepath
-            
-            if device.type == 1:
-                data = np.log10(np.loadtxt(device.filepath))
+            if row["Type"] == "Charge":
+                np.log10(np.loadtxt(row["Index"]))
             else:
-                data = np.loadtxt(device.filepath)
-
-            norm[device.type][0] = data.mean()
-            norm[device.type][1] = data.std()
-
-            np.savetxt(join(self.target,device.name),(data - norm[device.type][0])/(norm[device.type][1]))
-    
-            if device.type == 0:
+                np.loadtxt(row["Index"])
+            
 
 
 arguments = argparse.ArgumentParser()
