@@ -30,33 +30,35 @@ print("The data frame starts with {} rows \n".format(len(imgsdf.index)))
 
 def extended_query(string,df):
    args = string.split(" ")
+   #The first two args in the string are height and width, these are the main thing we search by
    height,width = args[0],args[1]
    if len(args) == 3 and (args[2].upper() == "ALL"):
-      #go to special case all function
+      #Handels special case of ALL
       selectedDf = df.query("Height == '{}' and Width == '{}'".format(height,width))
    else:
-      selection,VGVD = args[2],args[3]
-      selection = selection.split(":")
+      #The input string is formatted to tell us what the selected querry is, what the search parameters are 
+      # if we are using VG or VD and what the is the given value for VG/VD
+      selection,VGVD = args[2],args[3] 
+      selection = selection.split(":") #The first part of selection tells us if it is a percentage,range or specific indices and the second part is the value of said selection i.e. 50%
       selection[0] = selection[0].upper()
-      VGVD = VGVD.split(":")
+      VGVD = VGVD.split(":") #First element tells us the if it is VG or VD second element tells us the value
       shapeDF = df.query("Height == '{}' and Width == '{}' and {} == '{}'".format(height,width,VGVD[0],VGVD[1]))
-      if selection[0].startswith("P"):
-         percent = int(selection[1])/100
+      if selection[0].startswith("P"): #Percentage
+         percent = int(selection[1])/100 
          selectedDf = shapeDF.sample(frac = percent)
-      elif selection[0].startswith("R"):
+      elif selection[0].startswith("R"): #Range
          ranges = selection[1].split("to")
          start,stop = int(ranges[0]),int(ranges[1])
          selectedDf = shapeDF[start:stop]
-      elif selection[0].startswith("S"):
+      elif selection[0].startswith("S"): #Specific values
          strIndices = selection[1].split(",")
          intIndices = [int(i) for i in strIndices]
          selectedDf = shapeDF.iloc[intIndices]
       else:
          print("Error: Invalid data selection must choose from, Percentage, Range, Specific.")
 
-   #Finds the indices of selected data so that it can be removed from df
-   index = selectedDf.index
-   df = df.drop(index)
+   index = selectedDf.index #Finds the indices of selected data so that it can be removed from df
+   df = df.drop(index) #Removes queried data from dataframe
    print(df)
    print("\n")
    return selectedDf
