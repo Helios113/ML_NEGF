@@ -5,7 +5,7 @@ import argparse
 import pandas as pd
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--root', type=str, nargs='?', default='/tar_dir/',
+parser.add_argument('--root', type=str, nargs='?',
                     help='root')
 args = parser.parse_args()
 
@@ -29,7 +29,7 @@ def find_max_tier(df, row):
 class Aggregator:
     def __init__(self, args):
         self.root = args.root
-        self.target = args.target
+        self.target = 'tar_dir'
 
         self.df = (
             pd.DataFrame()
@@ -38,21 +38,22 @@ class Aggregator:
             pd.DataFrame()
         )  # [plane, vg, vd, location, type, iter, filedir, width, height, mean, std, cmpPath, tarPath, path]
 
-        self.avgmappings = {"avg_cur": 0, "abs_pot": 1}
-        self.planemappings = {"xy": 0, "yz": 1, "zx": 2}
-        self.typemappings = {"charge": 0, "pot": 1}
+    def save(self):
+        self.df.to_csv(join(self.root,'dataframe.csv'))
+        print("Saved Dataframe to .csv!")
 
     def read(self):
         # getting all files from all subdirectories and paths to said files
+        print("Reading Files...")
         imgs = []
         name_as_lst = []
         VGnums = set()
         VDnums = set()
-        target_prefix = "NEGFXY"
+        target_prefix = "NEGF"
 
         filenum = 0
         filenames = []
-        for root, dirs, files in os.walk("/home/bailey/ML_NEGF/main_data_dir"):
+        for root, dirs, files in os.walk(self.root):
             for name in files:
                 if name.startswith(target_prefix):
                     filenames.append(os.path.join(root, name))
@@ -77,6 +78,7 @@ class Aggregator:
             ],
         )
         self.df = df
+        print(self.df)
 
     def condition(self):
         # Condition should go through the entire self.array and condition based on the iteration number and data type
@@ -128,15 +130,12 @@ class Aggregator:
             norm[chrg][0] = data.mean()
             norm[chrg][1] = data.std()
             np.savetxt(
-                join("/home/bailey/ML_NEGF/tar_dir", row["Path"].split("/")[-1]),
+                join(self.root, self.target, row["Path"].split("/")[-1]),
                 (data - norm[chrg][0]) / (norm[chrg][1]),
             )
 
             # Add to conditioned to list for dataframe later
             list = row.values.tolist().append(norm[chrg][0] + norm[chrg][1])
-
-            # Reset norm lists
-            norm = [[0, 0], [0, 0]]
 
             # Get COMPARE data and normalise
             if midResult["Type"] == "Charge":
@@ -146,12 +145,9 @@ class Aggregator:
                 data = np.loadtxt(midResult["Index"])
                 chrg = 0
             np.savetxt(
-                join("/home/bailey/ML_NEGF/tar_dir", midResult["Path"].split("/")[-1]),
+                join(self.root, self.target, midResult["Path"].split("/")[-1]),
                 (data - norm[chrg][0]) / (norm[chrg][1]),
             )
-
-            # Reset norm lists
-            norm = [[0, 0], [0, 0]]
 
             # Get TARGET data and normalise
             if maxResult["Type"] == "Charge":
@@ -161,14 +157,14 @@ class Aggregator:
                 data = np.loadtxt(row["Index"])
                 chrg = 0
             np.savetxt(
-                join("/home/bailey/ML_NEGF/tar_dir", maxResult["Path"].split("/")[-1]),
+                join(self.root, self.target, maxResult["Path"].split("/")[-1]),
                 (data - norm[chrg][0]) / (norm[chrg][1]),
             )
 
             # Add paths to list
             list.append(
-                join("/home/bailey/ML_NEGF/tar_dir", midResult["Path"].split("/")[-1])
-                + join("/home/bailey/ML_NEGF/tar_dir", maxResult["Path"].split("/")[-1])
+                join(self.root, self.target, midResult["Path"].split("/")[-1])
+                + join(self.root, self.target, maxResult["Path"].split("/")[-1])
             )
 
         self.df_cond = pd.DataFrame(
@@ -186,6 +182,11 @@ class Aggregator:
                 "Mean",
                 "STD",
                 "cmpPath",
-                "tarPath" "Path",
+                "tarPath", 
+                "Path",
             ],
         )
+
+a1 = Aggregator(args)
+a1.read()
+a1.save()
