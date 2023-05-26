@@ -4,6 +4,7 @@ import os
 import argparse
 import pandas as pd
 import matplotlib as plt
+import pathlib
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--root", type=str, nargs="?", help="root")
@@ -166,7 +167,8 @@ class Aggregator:
 
             tmpPath = inpPotPath.split('/')[-4:]
             deviceDir = join(self.target, tmpPath[0], tmpPath[1], tmpPath[2])
-            os.mkdirs(deviceDir)
+            path = pathlib.Path(join(deviceDir,'tmp.txt'))
+            path.parent.mkdir(parents=True, exist_ok=True)
 
             np.savetxt(join(self.target, deviceDir, inpPotPath.split('/')[-1]), (np.loadtxt(inpPotPath) - norms[0][0]) / (norms[0][1]))
             tmpList.append(join(self.target, deviceDir, inpPotPath.split('/')[-1]))
