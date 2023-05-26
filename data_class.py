@@ -3,9 +3,11 @@ from os.path import join
 import os
 import argparse
 import pandas as pd
+import matplotlib as plt
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--root", type=str, nargs="?", help="root")
+parser.add_argument("--target", type=str, nargs="?", help="target")
 args = parser.parse_args()
 
 
@@ -25,18 +27,22 @@ def find_max_tier(df, row):
 
     return result.max()["Iteration"]
 
+def rreplace(s, old, new, occurrence):
+    li = s.rsplit(old, occurrence)
+    return new.join(li)
+
 
 class Aggregator:
     def __init__(self, args):
         self.root = args.root
-        self.target = "/home/bailey/ML_NEGF/tar_dir"
+        self.target = args.target
 
         self.df = (
             pd.DataFrame()
-        )  # [plane, vg, vd, location, type, iter, filedir, width, height, path]
+        )  # [plane, vg, vd, location, type, iter, crit, width, height, path]
         self.df_cond = (
             pd.DataFrame()
-        )  # [plane, vg, vd, location, type, iter, filedir, width, height, path, mean, std, cmpPath, tarPath]
+        )  # [plane, vg, vd, location, type, iter, crit, width, height, path, mean, std, cmpPath, tarPath]
 
     def save(self, filename, condFlag=0):
         try:
@@ -97,121 +103,120 @@ class Aggregator:
         # Condition should go through the entire self.array and condition based on the iteration number and data type
         # Get all entries with iterator == 1, each entire to find max and mid values of same result
         dataList = []
-        unique_devices = self.df.query("Iteration == '1'")
+        unique_devices = self.df.query("Iteration == '1' and Type == 'pot'")
+        # [plane, vg, vd, location, type, iter, crit, width, height, path]
+
         try:
             os.mkdir(join(self.target))
         except Exception as e:
             print("Found target dir")
 
         for index, row in unique_devices.iterrows():
-            norm = [[0, 0], [0, 0]]
-            # First find the max and mid value iteration for the given device file
-            max = int(find_max_tier(self.df, row))
-            mid = max // 2
-            midResult = pd.DataFrame()
 
-            # Now find the row that relates to that value and the other matching params
-            i = 1
-            print(row)
-            while midResult.empty == True and mid >= 1:
-                midResult = self.df.query(
-                    "Plane == '{}' and VG == '{}' and VD == '{}' and Location == '{}' and Type == '{}' and Iteration == '{}' and Criteria == '{}' and Height == '{}' and Width == '{}'".format(
-                        row["Plane"],
-                        row["VG"],
-                        row["VD"],
-                        row["Location"],
-                        row["Type"],
-                        str(mid),
-                        row["Criteria"],
-                        row["Height"],
-                        row["Width"],
-                    )
-                )
-                mid = max - i
-                i += 1
+            tmpList = row.to_list()
+            tmpList.pop(5)
+            tmpList.pop(4)
+            tmpList.pop(-1)
 
-            maxResult = self.df.query(
+            inpPotPath = row["Path"]
+            inpChargePath = rreplace(inpPotPath, "pot", "charge", 1)
+
+            tar = find_max_tier(self.df, row)
+            cmp = str(int(tar) // 2)
+
+            tarPotPath = self.df.query(
                 "Plane == '{}' and VG == '{}' and VD == '{}' and Location == '{}' and Type == '{}' and Iteration == '{}' and Criteria == '{}' and Height == '{}' and Width == '{}'".format(
-                    row["Plane"],
-                    row["VG"],
-                    row["VD"],
-                    row["Location"],
-                    row["Type"],
-                    max,
-                    row["Criteria"],
-                    row["Height"],
-                    row["Width"],
+                row["Plane"],
+                row["VG"],
+                row["VD"],
+                row["Location"],
+                row["Type"],
+                tar,
+                row["Criteria"],
+                row["Height"],
+                row["Width"],
                 )
-            )
+            ).iloc[0]["Path"]
 
-            if row["Type"] == "charge":
-                data = np.log10(np.loadtxt(row["Path"]))
-                chrg = 1
-            else:
-                data = np.loadtxt(row["Path"])
-                chrg = 0
+            tarChargePath = rreplace(tarPotPath, "pot", "charge", 1)
 
-            norm[chrg][0] = data.mean()
-            norm[chrg][1] = data.std()
-            np.savetxt(
-                join(self.target, row["Path"].split("/")[-1]),
-                (data - norm[chrg][0]) / (norm[chrg][1]),
-            )
+            cmpPotPath = self.df.query(
+                "Plane == '{}' and VG == '{}' and VD == '{}' and Location == '{}' and Type == '{}' and Iteration == '{}' and Criteria == '{}' and Height == '{}' and Width == '{}'".format(
+                row["Plane"],
+                row["VG"],
+                row["VD"],
+                row["Location"],
+                row["Type"],
+                cmp,
+                row["Criteria"],
+                row["Height"],
+                row["Width"],
+                )
+            ).iloc[0]["Path"]
 
-            # Add to conditioned to list for dataframe later
-            tmpList = row.values.tolist()
-            tmpList.append(norm[chrg][0])
-            tmpList.append(norm[chrg][1])
+            cmpChargePath = rreplace(cmpPotPath, "pot", "charge", 1)
 
-            # Get COMPARE data and normalise
-            if midResult.iloc[0]["Type"] == "charge":
-                data = np.log10(np.loadtxt(midResult.iloc[0]["Path"]))
-                chrg = 1
-            else:
-                data = np.loadtxt(midResult.iloc[0]["Path"])
-                chrg = 0
-            np.savetxt(
-                join(self.target, midResult.iloc[0]["Path"].split("/")[-1]),
-                (data - norm[chrg][0]) / (norm[chrg][1]),
-            )
+            norms = [[0,0],[0,0]]
 
-            # Get TARGET data and normalise
-            if maxResult.iloc[0]["Type"] == "charge":
-                data = np.log10(np.loadtxt(maxResult.iloc[0]["Path"]))
-                chrg = 1
-            else:
-                data = np.loadtxt(maxResult.iloc[0]["Path"])
-                chrg = 0
-            np.savetxt(
-                join(self.target, maxResult.iloc[0]["Path"].split("/")[-1]),
-                (data - norm[chrg][0]) / (norm[chrg][1]),
-            )
+            norms[0][0] = (np.loadtxt(inpPotPath)).mean()
+            norms[0][1] = (np.loadtxt(inpPotPath)).std()
 
-            # Add paths to list
-            tmpList.append(join(self.target, midResult.iloc[0]["Path"].split("/")[-1]))
-            tmpList.append(join(self.target, maxResult.iloc[0]["Path"].split("/")[-1]))
+            norms[1][0] = (np.log10(np.loadtxt(inpChargePath))).mean()
+            norms[1][1] = (np.log10(np.loadtxt(inpChargePath))).std()
+
+            tmpPath = inpPotPath.split('/')[-4:]
+            deviceDir = join(self.target, tmpPath[0], tmpPath[1], tmpPath[2])
+            os.mkdirs(deviceDir)
+
+            np.savetxt(join(self.target, deviceDir, inpPotPath.split('/')[-1]), (np.loadtxt(inpPotPath) - norms[0][0]) / (norms[0][1]))
+            tmpList.append(join(self.target, tmpPath[0], tmpPath[1], tmpPath[2], tmpPath[3]))
+
+            tmpPath = inpChargePath.split('/')[-4:]
+            np.savetxt(join(self.target, deviceDir, inpChargePath.split('/')[-1]), (np.log10(np.loadtxt(inpChargePath)) - norms[0][0]) / (norms[0][1]))
+            tmpList.append(join(self.target, tmpPath[0], tmpPath[1], tmpPath[2], tmpPath[3]))
+
+            tmpPath = cmpPotPath.split('/')[-4:]
+            np.savetxt(join(self.target, tmpPath[0], tmpPath[1], tmpPath[2], tmpPath[3]), (np.loadtxt(cmpPotPath) - norms[0][0]) / (norms[0][1]))
+            tmpList.append(join(self.target, tmpPath[0], tmpPath[1], tmpPath[2], tmpPath[3]))
+
+            tmpPath = cmpChargePath.split('/')[-4:]
+            np.savetxt(join(self.target, tmpPath[0], tmpPath[1], tmpPath[2], tmpPath[3]), (np.log10(np.loadtxt(cmpChargePath)) - norms[0][0]) / (norms[0][1]))
+            tmpList.append(join(self.target, tmpPath[0], tmpPath[1], tmpPath[2], tmpPath[3]))
+
+            tmpPath = tarPotPath.split('/')[-4:]
+            np.savetxt(join(self.target, tmpPath[0], tmpPath[1], tmpPath[2], tmpPath[3]), (np.loadtxt(tarPotPath) - norms[0][0]) / (norms[0][1]))
+            tmpList.append(join(self.target, tmpPath[0], tmpPath[1], tmpPath[2], tmpPath[3]))
+
+            tmpPath = tarChargePath.split('/')[-4:]
+            np.savetxt(join(self.target, tmpPath[0], tmpPath[1], tmpPath[2], tmpPath[3]), (np.log10(np.loadtxt(tarChargePath)) - norms[0][0]) / (norms[0][1]))
+            tmpList.append(join(self.target, tmpPath[0], tmpPath[1], tmpPath[2], tmpPath[3]))
+            
+            tmpList.append(norms[0][0])
+            tmpList.append(norms[0][1])
+            tmpList.append(norms[1][0])
+            tmpList.append(norms[1][1])
 
             dataList.append(tmpList)
 
-        self.df_cond = pd.DataFrame(
-            dataList,
-            columns=[
-                "Plane",
-                "VG",
-                "VD",
-                "Location",
-                "Type",
-                "Iteration",
-                "Criteria",
-                "Height",
-                "Width",
-                "Path",
-                "Mean",
-                "STD",
-                "cmpPath",
-                "tarPath",
-            ],
-        )
+        self.df_cond = pd.DataFrame(dataList, columns=[
+        "Plane",
+        "VG",
+        "VD",
+        "Location",
+        "Criteria",
+        "Height",
+        "Width",
+        "inpPotPath",
+        "inpChargePath",
+        "cmpPotPath",
+        "cmpChargePath",
+        "tarPotPath",
+        "tarChargePath",
+        "Pot Mean",
+        "Pot STD",
+        "Charge Mean",
+        "Charge STD",
+    ],)
 
 
 a1 = Aggregator(args)

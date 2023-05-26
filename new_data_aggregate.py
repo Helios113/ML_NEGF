@@ -1,4 +1,3 @@
-import os
 from os import listdir
 import numpy as np
 from os.path import isfile, join
@@ -9,48 +8,31 @@ import matplotlib.pyplot as plt
 
 name = "3x12_16_damp00"
 
-# getting all files from all subdirectories and paths to said files
-imgs = []
-imgs_dir_dict = {}
-target_prefix = "NEGFXY"
-for root, dirs, files in os.walk("/home/kyle/ML_NEGF/main_data_dir"):
-    for name in files:
-        if name.startswith(target_prefix):
-            imgs.append(str(name))
-            imgs_dir_dict[name] = str(root).split("/")[-3:]
-
-print("\n")
-print("LIST OF IMGS:")
-print(imgs)
-print("\n")
-print("DICT OF IMG NAMES AND DIRECTORIES:")
-print(imgs_dir_dict)
-print("\n")
-
-
 res_dir = "data"
-# img_dir = res_dir+'/ml_test'
-# cond_dir = res_dir+"/"+name+'/dat_std'
-# imgs = listdir(img_dir)
+img_dir = res_dir + "/ml_test"
+cond_dir = res_dir + "/" + name + "/dat_std"
 
+target_prefix = "NEGFXY"
 table = "/info_dat_std_{nm}.csv".format(nm=target_prefix)
-info_file = open("res_dir" + "/" + name + table, "w+")
+info_file = open(res_dir + "/" + name + table, "w+")
 writer = csv.writer(info_file)
 
 
 inp_suffix = "_1.txt"
 cmp_suffix = "_4.txt"
+
 tar_suffix = "_{index}.txt"
 
+imgs = listdir(img_dir)
 
 np.seterr(all="raise")
-# files = [f for f in imgs if isfile(join(img_dir, f)) and f.startswith(target_prefix)]
+files = [f for f in imgs if isfile(join(img_dir, f)) and f.startswith(target_prefix)]
 
 
 # Find the same devices everywhere
 unique_names = defaultdict(list)
 max_index = defaultdict(lambda: 0)
-for f in imgs:
+for f in files:
     key = "_".join(f.split("_", 3)[:3])
     val = int(f.rsplit(".", 1)[0].split("_")[-1])
     # key1 = "_".join(f.split("_")[:4])
@@ -59,15 +41,12 @@ for f in imgs:
     if max_index[key] < val:
         max_index[key] = val
 
-# Take each formatted parameters in from Kyle
-#
-
 for key, val in unique_names.items():
-    val.sort()  # Where val is NEGFZX_0.8_0.8_9_pot_8.txt
+    val.sort()
     matches = filter(lambda a: a.endswith(inp_suffix), val)
     norm = [[0, 0], [0, 0]]
-    for v in val:  # val is a list
-        chrg = int("charge" in v)  # find charge in v, 1 if found
+    for v in val:
+        chrg = int("charge" in v)
         if v.endswith(inp_suffix):
             data = (
                 np.log10(np.loadtxt(join(img_dir, v)))
@@ -77,7 +56,6 @@ for key, val in unique_names.items():
             norm[chrg][0] = data.mean()
             norm[chrg][1] = data.std()
             np.savetxt(join(cond_dir, v), (data - norm[chrg][0]) / (norm[chrg][1]))
-
         if v.endswith(cmp_suffix) or v.endswith(
             tar_suffix.format(index=max_index[key])
         ):
@@ -87,7 +65,6 @@ for key, val in unique_names.items():
                 else np.loadtxt(join(img_dir, v))
             )
             np.savetxt(join(cond_dir, v), (data - norm[chrg][0]) / (norm[chrg][1]))
-
         if v.endswith(inp_suffix) and chrg == 0:
             v1 = v.replace("pot", "charge")
             vd = v.split("_", 4)[1]
@@ -107,21 +84,6 @@ for key, val in unique_names.items():
                 + tar_suffix.format(index=max_index[key])
             )
 
-            row = [
-                v,
-                v1,
-                cmp_p,
-                cmp_c,
-                tar_p,
-                tar_c,
-                norm[0][0],
-                norm[0][1],
-                norm[1][0],
-                norm[1][1],
-                vd,
-                vg,
-                loc,
-            ]
             row = [
                 v,
                 v1,
