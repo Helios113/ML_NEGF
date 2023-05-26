@@ -23,8 +23,6 @@ for root, dirs, files in os.walk("/home/kyle/ML_NEGF/main_data_dir"):
         imgs.append(name_as_lst + [criteria,Height,Width] +[os.path.join(root, name)])
 
 
-
-
 imgsdf = pd.DataFrame(imgs,columns=['Plane','VG','VD','Location',"Type","Iteration","Criteria","Height","Width","Path"])
 imgsdf.to_csv("/home/kyle/ML_NEGF/test_csv_output/test.csv")
 df = pd.read_csv("/home/kyle/ML_NEGF/test_csv_output/test.csv")

@@ -4,8 +4,8 @@ import yaml
 df = pd.read_csv('/home/kyle/ML_NEGF/test_csv_output/dataframe_conditioned.csv')
 # skip header line
 # drop columns that only have NaNs
-
-with open("/home/kyle/ML_NEGF/query.yaml", "r") as stream:
+queries = None
+with open("query.yaml", "r") as stream:
     try:
         queries = yaml.safe_load(stream)
     except yaml.YAMLError as exc:
