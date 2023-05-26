@@ -1,4 +1,4 @@
-,Plane,VG,VD,Location,Type,Iteration,Critiria,Height,Width,Path
+,Plane,VG,VD,Location,Type,Iteration,Criteria,Height,Width,Path
 0,XY,0.8,0.14375,6,pot,33,avg_cur,3,9,/home/kyle/ML_NEGF/main_data_dir/avg_cur/3x9/ml_test/NEGFXY_0.8_0.14375_6_pot_33
 1,XY,0.8,0.14375,6,pot,27,avg_cur,3,9,/home/kyle/ML_NEGF/main_data_dir/avg_cur/3x9/ml_test/NEGFXY_0.8_0.14375_6_pot_27
 2,XY,0.05,0.05,0,pot,4,avg_cur,3,9,/home/kyle/ML_NEGF/main_data_dir/avg_cur/3x9/ml_test/NEGFXY_0.05_0.05_0_pot_4

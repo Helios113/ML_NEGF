@@ -1,0 +1,18 @@
+training:
+    query:
+        Height: 3
+        Width: 9
+        Condition: 0
+        Criteria: abs_pot
+        VD: ALL
+        VG: ALL
+
+
+testing:
+    query:
+        Height: 3
+        Width: 9
+        Condition: ALL
+        VD: ALL
+        Criteria: abs_pot
+        VG: ALL
