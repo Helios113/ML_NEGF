@@ -6,6 +6,8 @@ from models.VAE import VAE
 import argparse
 import os
 from datetime import datetime, timedelta
+import pandas as pd
+
 torch.manual_seed(42)
 # Instantiate the parser
 parser = argparse.ArgumentParser(description='ML_NEGF')
@@ -110,18 +112,25 @@ elif torch.backends.mps.is_available() and gpu_support:
 else:
     device = "cpu"  # Defaults to CPU if NVIDIA GPU/Apple GPU aren't available
 
+dataframe1 = pd.DataFrame()
+dataframe2 = pd.DataFrame()
 
-dataset = NEFGSet("info_dat_std_NEGFXY.csv",
-                  "data/3x12_16_damp00", "dat_std", device=device, locXY=locXY)
+train_dataset = NEFGSet(dataframe1, device=device)
 
-imgChannels = int(dataset[0][0].shape[0])
+test_dataset = NEFGSet(dataframe2, device=device)
+
+imgChannels = int(train_dataset[0][0].shape[0])
 # Split data into training and validation sets
 
-length = len(dataset)
-train_split = math.floor(length*train_split_ration)
-test_split = length - train_split
-train_inds, test_inds = torch.utils.data.random_split(
-    dataset, [train_split, test_split], generator=torch.Generator().manual_seed(42))
+# Used in printing no. of samples from each set
+train_split = len(train_dataset)
+test_split = len(test_dataset)
+
+#length = len(dataset)
+#train_split = math.floor(length*train_split_ration)
+#test_split = length - train_split
+#train_inds, test_inds = torch.utils.data.random_split(
+#    dataset, [train_split, test_split], generator=torch.Generator().manual_seed(42))
 
 
 print(r"{:-^30}".format("PID"), file=inf_f)
@@ -142,17 +151,17 @@ print(r"{txt:<20}:{val}".format(
 print(r"{txt:<20}:{val}".format(txt="addX", val=addX), file=inf_f)
 print(r"{:-^30}".format(""), file=inf_f)
 print(r"{txt:<20}:{val1:d}/{val2:d}".format(txt="data split:",
-      val1=int(train_split_ration*100), val2=int(100-train_split_ration*100)), file=inf_f)
+    val1=int(train_split_ration*100), val2=int(100-train_split_ration*100)), file=inf_f)
 print(r"{txt:<20}:{val}".format(
     txt="train samples", val=train_split), file=inf_f)
 print(r"{txt:<20}:{val}".format(txt="test samples", val=test_split), file=inf_f)
 print(r"{txt:<20}:{val}".format(txt="total",
-      val=train_split+test_split), file=inf_f)
+    val=train_split+test_split), file=inf_f)
 print(r"{:-^30}".format("Model"), file=inf_f)
 
-train_data = torch.utils.data.DataLoader(dataset=train_inds, batch_size=batch_size,
-                                         shuffle=True)
-test_data = torch.utils.data.DataLoader(dataset=test_inds, batch_size=batch_size,
+train_data = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size,
+                                        shuffle=True)
+test_data = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size,
                                         shuffle=True)
 
 init_time = datetime.now()
