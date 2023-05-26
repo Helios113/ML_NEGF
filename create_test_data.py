@@ -1,7 +1,7 @@
 from os.path import join
 import numpy as np
 
-targetPath = '/home/bailey/ML_NEGF/testing_data'
+targetPath = 'data_test/'
 
 critPath = ['abs_pot', 'avg_cur']
 shapePath = ['3x9','3x12']
@@ -10,7 +10,7 @@ name = "NEGFXY"
 vg = ['0.05','0.8']
 vd = ['0.05','0.8']
 type = ["charge", "pot"]
-iteration = ['1','2','3','4','5']
+iteration = ['1','2']
 
 for eachVG in vg:
     for eachVD in vd:

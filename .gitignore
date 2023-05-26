@@ -6,3 +6,7 @@
 NEGFXY*
 NEGFYZ*
 NEGFZX*
+*.txt
+*.mp
+*.pdf
+/.DS_Store
