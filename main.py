@@ -7,6 +7,7 @@ import argparse
 import os
 from datetime import datetime, timedelta
 import pandas as pd
+from yaml_query import *
 
 torch.manual_seed(42)
 # Instantiate the parser
@@ -16,8 +17,14 @@ parser = argparse.ArgumentParser(description='ML_NEGF')
 # parser.add_argument('--batch_size', type=int,
 #                     help='An optional integer argument')
 
+#Path to yaml file
+parser.add_argument('--query_path',type=str,nargs='?',help='Path to yaml Query')
+
+#Path to yaml file
+parser.add_argument('--cond_data_path',type=str,nargs='?',help='Path to conditioned data')
+
 # Optional argument
-parser.add_argument('--batch_size', type=int, nargs='?', default=50,
+parser.add_argument('--batch_size', type=int, nargs='?', default=32,
                     help='Batch size')
 
 # Optional argument
@@ -63,6 +70,8 @@ args = parser.parse_args()
 """
 Parameters
 """
+condiditioned_path = args.cond_data_path
+query_path = args.query_path
 batch_size = args.batch_size
 num_epochs = args.epochs
 lr = args.lr
@@ -112,8 +121,8 @@ elif torch.backends.mps.is_available() and gpu_support:
 else:
     device = "cpu"  # Defaults to CPU if NVIDIA GPU/Apple GPU aren't available
 
-dataframe1 = pd.DataFrame()
-dataframe2 = pd.DataFrame()
+query = query_data(querypath=query_path,datapath=condiditioned_path)
+dataframe1,dataframe2 = query.query_search()
 
 train_dataset = NEFGSet(dataframe1, device=device)
 

@@ -3,8 +3,15 @@ training:
         Height: 3
         Width: 9
         Criteria: abs_pot
+        Condition: 50%
+        VD: 0.05-0.8
+        VG: ALL
+    query2:
+        Height: 3
+        Width: 12
+        Criteria: abs_pot
         Condition: 0
-        VD: ALL
+        VD: 0.8
         VG: ALL
 
 
@@ -14,5 +21,12 @@ testing:
         Width: 9
         Condition: ALL
         VD: ALL
+        Criteria: abs_pot
+        VG: ALL
+    query2:
+        Height: 3
+        Width: 12
+        Condition: ALL
+        VD: 0.8
         Criteria: abs_pot
         VG: ALL
