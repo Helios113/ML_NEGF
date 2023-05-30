@@ -2,8 +2,8 @@ training:
     query:
         Height: 3
         Width: 9
-        Condition: 0
         Criteria: abs_pot
+        Condition: 0
         VD: ALL
         VG: ALL
 

@@ -1,4 +1,0 @@
-
-python main.py info_dat_pot_std.csv data/3x12x16 dat_pot_std 3x12_16_pot_loss.mp fig_folder/pot.png
-
-python main.py info_dat_charge_std.csv data/3x12x16 dat_charge_std 3x12_16_charge_loss.mp fig_folder/charge.png

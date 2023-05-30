@@ -177,45 +177,45 @@ class Aggregator:
             norms[1][1] = (np.log10(np.loadtxt(inpChargePath))).std()
 
             tmpPath = inpPotPath.split("/")[-4:]
-            deviceDir = join(self.target, tmpPath[0], tmpPath[1], tmpPath[2])
-            path = pathlib.Path(join(deviceDir, "tmp.txt"))
-            path.parent.mkdir(parents=True, exist_ok=True)
+            deviceDir = join(self.target,tmpPath[0], tmpPath[1], tmpPath[2])
+            if not os.path.exists(deviceDir):
+                os.makedirs(deviceDir)
 
             np.savetxt(
-                join(self.target, deviceDir, inpPotPath.split("/")[-1]),
+                join(deviceDir, inpPotPath.split("/")[-1]),
                 (np.loadtxt(inpPotPath) - norms[0][0]) / (norms[0][1]),
             )
-            tmpList.append(join(self.target, deviceDir, inpPotPath.split("/")[-1]))
+            tmpList.append(join( deviceDir, inpPotPath.split("/")[-1]))
 
             np.savetxt(
-                join(self.target, deviceDir, inpChargePath.split("/")[-1]),
+                join(deviceDir, inpChargePath.split("/")[-1]),
                 (np.log10(np.loadtxt(inpChargePath)) - norms[1][0]) / (norms[1][1]),
             )
-            tmpList.append(join(self.target, deviceDir, inpChargePath.split("/")[-1]))
+            tmpList.append(join(deviceDir, inpChargePath.split("/")[-1]))
 
             np.savetxt(
-                join(self.target, deviceDir, cmpPotPath.split("/")[-1]),
+                join(deviceDir, cmpPotPath.split("/")[-1]),
                 (np.loadtxt(cmpPotPath) - norms[0][0]) / (norms[0][1]),
             )
-            tmpList.append(join(self.target, deviceDir, cmpPotPath.split("/")[-1]))
+            tmpList.append(join(deviceDir, cmpPotPath.split("/")[-1]))
 
             np.savetxt(
-                join(self.target, deviceDir, cmpChargePath.split("/")[-1]),
+                join(deviceDir, cmpChargePath.split("/")[-1]),
                 (np.log10(np.loadtxt(cmpChargePath)) - norms[1][0]) / (norms[1][1]),
             )
-            tmpList.append(join(self.target, deviceDir, cmpChargePath.split("/")[-1]))
+            tmpList.append(join(deviceDir, cmpChargePath.split("/")[-1]))
 
             np.savetxt(
-                join(self.target, deviceDir, tarPotPath.split("/")[-1]),
+                join(deviceDir, tarPotPath.split("/")[-1]),
                 (np.loadtxt(tarPotPath) - norms[0][0]) / (norms[0][1]),
             )
-            tmpList.append(join(self.target, deviceDir, tarPotPath.split("/")[-1]))
+            tmpList.append(join(deviceDir, tarPotPath.split("/")[-1]))
 
             np.savetxt(
-                join(self.target, deviceDir, tarChargePath.split("/")[-1]),
+                join(deviceDir, tarChargePath.split("/")[-1]),
                 (np.log10(np.loadtxt(tarChargePath)) - norms[1][0]) / (norms[1][1]),
             )
-            tmpList.append(join(self.target, deviceDir, tarChargePath.split("/")[-1]))
+            tmpList.append(join(deviceDir, tarChargePath.split("/")[-1]))
 
             tmpList.append(norms[0][0])
             tmpList.append(norms[0][1])

@@ -12,6 +12,35 @@ with open("query.yaml", "r") as stream:
         print(exc)
 
 
+def query_trans(args):
+    # reads query from string and converts to consise info for df
+    VG = None
+    VD = None
+    if args["VG"].upper() == "ALL":
+        VG = df["VG"].unique() # type: ignore
+    elif "," in args["VG"]:
+        VG = str(args["VG"]).split(",")
+        VG = [float(x) for x in VG]
+    elif "-" in args["VG"]:
+        VG1 = str(args["VG"]).split("-")
+        VG1 = [float(x) for x in VG1]
+        VG = df["VG"].between(VG1[0], VG[1]) # type: ignore
+        
+    if args["VD"].upper() == "ALL":
+        VD = df["VD"].unique() # type: ignore
+    elif "," in args["VD"]:
+        VD = str(args["VD"]).split(",")
+        VD = [float(x) for x in VD]
+    elif "-" in args["VD"]:
+        VD1 = str(args["VD"]).split("-")
+        VD1 = [float(x) for x in VD1]
+        VD = df["VD"].between(VD1[0], VD1[1]) # type: ignore
+        
+    return VG, VD
+   
+    
+    
+
 #takes in a nested dictionary that is iterated through, the values in the nested dictionary tell us the type of query we are making and 
 # the conditions in the query i.e. Height width if we are searching for a percentage and what that percentage is and if we are searching
 # for VD of VG and the given value for VG/VD
@@ -22,16 +51,8 @@ for key in queries:
     totalDF = pd.DataFrame()
     for key in queries[key]:
         args = queries[prevkey][key]
-        if args["VG"] == "ALL":
-            VG = df["VG"].unique()
-        else:
-            VG = str(args["VG"]).split(",")
-            VG = [float(x) for x in VG]
-        if args["VD"] == "ALL":
-            VD = df["VD"].unique()
-        else:
-            VD = str(args["VD"]).split(",")
-            VD = [float(x) for x in VD]
+        
+        VD, VG = query_trans(args)
         ShapedDF = df[(df["Height"] == args["Height"]) & (df["Width"] == args["Width"]) & (df["Criteria"] == args["Criteria"])
                     & (df["VG"].isin(VG)) & (df["VD"].isin(VD))]
         condition = training[key]["Condition"]

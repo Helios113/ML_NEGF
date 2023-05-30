@@ -1,3 +1,0 @@
-import chime
-
-chime.success()

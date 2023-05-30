@@ -1,0 +1,25 @@
+#! /bin/bash
+
+#  Example GE submission script.
+#
+#  Date: May 2020
+#
+#  All jobs require a mem_tokens resource request, set to the approximate amount
+#  of memory required.  In the case of multi-process jobs, this is the amount
+#  of memory required by one process, not by the job as a whole.  For example,
+#  a job needing 1 GB of memory would set mem_tokens=1G below.
+#
+#  Lines starting #$ contain directives to GE, which tell it how to run the job.
+#  Other lines starting # are comments, and are ignored by GE.
+
+#$ -N Test                     # Name of the job
+#$ -q college.q                 # Queue in which to run job
+#$ -l mem_tokens=1G               # 1 GB memory
+#$ -cwd                           # Run in current working directory
+#$ -o out-$JOB_ID.log             # File to which standard output should be sent, with job number in filename
+#$ -e err-$JOB_ID.log             # File for standard error, with job nubmer in filename
+#$ -M preslav.aleksandrov@glasgow.ac.uk    # Your email address
+#$ -m beas			  # The things to send you emails for: begin, end, abort, suspend
+
+source /home/staff/pa112h/spack/opt/spack/linux-centos7-zen2/gcc-9.3.0/anaconda3-2022.10-j2pawrzvhsnvudtg2pm3dutcteggzuvp/bin/activate fed.venv
+python data_class.py --input new_4page/ --output test_res/

@@ -1,7 +1,7 @@
 from os.path import join
 import numpy as np
 
-targetPath = '/home/bailey/ML_NEGF/testing_data'
+targetPath = 'main_data_dir'
 
 critPath = ['abs_pot', 'avg_cur']
 shapePath = ['3x9','3x12']
