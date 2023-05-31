@@ -124,6 +124,10 @@ else:
 query = query_data(querypath=query_path,datapath=condiditioned_path)
 dataframe1,dataframe2 = query.query_search()
 
+print(dataframe1)
+print("\n")
+print(dataframe2)
+
 train_dataset = NEFGSet(dataframe1, device=device)
 
 test_dataset = NEFGSet(dataframe2, device=device)
