@@ -23,4 +23,4 @@
 
 source /home/staff/pa112h/spack/opt/spack/linux-centos7-zen2/gcc-9.3.0/anaconda3-2022.10-j2pawrzvhsnvudtg2pm3dutcteggzuvp/bin/activate fed.venv
 export MKL_DEBUG_CPU_TYPE=5
-python main.py --query_path query_2.yaml --cond_data_path cond_data/dataframe_conditioned.csv --name test2_l --res res --tar pot --gpu --epochs 1000
+python main.py --query_path query_2.yaml --cond_data_path cond_data/dataframe_conditioned.csv --name test2_l --res res --tar pot --gpu --epochs 700 --batch False --drop 0.3

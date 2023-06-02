@@ -7,6 +7,7 @@ name_as_lst = []
 VGnums = set()
 VDnums = set()
 target_prefix = "NEGF"
+torch.manual_seed(42)
 
 for root, dirs, files in os.walk("/home/kyle/ML_NEGF/main_data_dir"):
     for name in files:

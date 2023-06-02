@@ -63,6 +63,12 @@ parser.add_argument('--tar', required=True,choices=['pot', 'charge'], action='st
 parser.add_argument('--res', action='store', default="results",
                     type=str, help='Folder name for parent dir')
 
+parser.add_argument('--batch', action='store', default=True,
+                    type=bool, help='Boolean to use batch norm')
+
+parser.add_argument('--drop', action='store', default=0.5,
+                    type=float, help='Dropout value between 0 and 1')
+
 
 args = parser.parse_args()
 
@@ -73,6 +79,8 @@ Parameters
 condiditioned_path = args.cond_data_path
 query_path = args.query_path
 batch_size = args.batch_size
+batch_use = args.batch
+dropout_val = args.drop
 num_epochs = args.epochs
 lr = args.lr
 locXY = args.notLocXY
@@ -186,7 +194,7 @@ for test_dataset in test_dataset_list:
                                         shuffle=True))
 
 init_time = datetime.now()
-net = VAE(imgChannels=imgChannels, layers=layers, residu=residu, addX=addX).to(device)
+net = VAE(imgChannels=imgChannels, layers=layers, residu=residu, addX=addX, use_batch=batch_use, dropout=dropout_val).to(device)
 
 print(net, file=inf_f)
 print(r"{:-^30}".format("Optimiser"), file=inf_f)

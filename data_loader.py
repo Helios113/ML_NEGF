@@ -6,6 +6,7 @@ from torchvision import transforms
 import matplotlib.pyplot as plt
 import numpy as np
 
+torch.manual_seed(42)
 
 class NEFGSet(Dataset):
     # This class should be used to create PyTorch compatible objects from a given dataframe

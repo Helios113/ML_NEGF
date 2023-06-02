@@ -7,7 +7,7 @@ A Convolutional Variational Autoencoder
 """
 class VAE(nn.Module):
     # ther og net had 128 final channels
-    def __init__(self, imgChannels=3, layers = [16,32,64,64], residu = {}, addX = True):
+    def __init__(self, imgChannels=3, layers = [16,32,64,64], residu = {}, addX = True, use_batch=True, dropout=0.5):
         super(VAE, self).__init__()
 
         self.enc_modules = nn.ModuleList()
@@ -17,14 +17,24 @@ class VAE(nn.Module):
         inChannels = imgChannels
         outChannels = layers[0]
         for i in layers:
-            self.enc_modules.append(
-                nn.Sequential(
-                nn.Conv2d(in_channels=inChannels, out_channels=i, kernel_size=5),
-                nn.BatchNorm2d(i),
-                nn.Dropout(0.3),
-                nn.LeakyReLU()
+            if use_batch:
+                self.enc_modules.append(
+                    nn.Sequential(
+                    nn.Conv2d(in_channels=inChannels, out_channels=i, kernel_size=5),
+                    nn.BatchNorm2d(i),
+                    nn.Dropout(dropout),
+                    nn.LeakyReLU()
+                    )
                 )
-            )
+            else:
+                self.enc_modules.append(
+                    nn.Sequential(
+                    nn.Conv2d(in_channels=inChannels, out_channels=i, kernel_size=5),
+                    # nn.BatchNorm2d(i),
+                    nn.Dropout(dropout),
+                    nn.LeakyReLU()
+                    )
+                )
             inChannels = i
             
         
@@ -32,14 +42,25 @@ class VAE(nn.Module):
         for i in range(len(layers)-1):
             inChannels = layers[i]
             outChannels = layers[i+1]
-            self.dec_modules.append(
-                nn.Sequential(
-                nn.ConvTranspose2d(in_channels=inChannels, out_channels=outChannels, kernel_size=5),
-                nn.BatchNorm2d(outChannels),
-                nn.Dropout(0.3),
-                nn.ReLU()
+            if use_batch:
+                self.dec_modules.append(
+                    nn.Sequential(
+                    nn.ConvTranspose2d(in_channels=inChannels, out_channels=outChannels, kernel_size=5),
+                    nn.BatchNorm2d(outChannels),
+                    nn.Dropout(dropout),
+                    nn.ReLU()
+                    )
                 )
-            )
+            else:
+                self.dec_modules.append(
+                    nn.Sequential(
+                    nn.ConvTranspose2d(in_channels=inChannels, out_channels=outChannels, kernel_size=5),
+                    # nn.BatchNorm2d(outChannels),
+                    nn.Dropout(dropout),
+                    nn.ReLU()
+                    )
+                )
+                
         self.dec_modules.append(
                 nn.Sequential(
                 nn.ConvTranspose2d(in_channels=layers[-1], out_channels=1, kernel_size=5),
