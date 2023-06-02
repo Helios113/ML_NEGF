@@ -60,9 +60,9 @@ class VAE(nn.Module):
                 x=torch.add(x,self.residu[len(self.dec_modules)-i-2 ])
         return x
     
-    def forward(self, x):
+    def forward(self, x, t):
         if self.addX:
-            out = torch.add(self.decode(self.encode(x)),x[:,0,...].unsqueeze(1))
+            out = torch.add(self.decode(self.encode(x)),x[:,t,...].unsqueeze(1))
         else:
             out = self.decode(self.encode(x))
         return out

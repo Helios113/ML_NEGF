@@ -4,4 +4,7 @@
     ],
     "python.analysis.typeCheckingMode": "basic",
     "todo-tree.tree.showBadges": false,
+    "editor.minimap.renderCharacters": false,
+    "editor.minimap.scale": 3,
+    "editor.minimap.autohide": true,
 }

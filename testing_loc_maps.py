@@ -8,8 +8,9 @@ import os
 from datetime import datetime, timedelta
 import pandas as pd
 from yaml_query import *
-
+import matplotlib.pyplot as plt
 torch.manual_seed(42)
+import numpy as np
 # Instantiate the parser
 parser = argparse.ArgumentParser(description='ML_NEGF')
 
@@ -84,7 +85,7 @@ gpu_support = args.gpu
 addX = args.addX
 layers = args.layers
 target = args.tar
-tar = int(target=="charge")+3 # 4 if pot, 3 if charge
+tar = int(target=="pot")+3
 """
 Paths
 """
@@ -126,7 +127,6 @@ dataframe1, dataframe2 = query.query_search()
 
 train_dataset_list = list()
 test_dataset_list = list()
-
 for df in dataframe1:
     train_dataset_list.append(NEFGSet(df, device=device))
 
@@ -143,38 +143,12 @@ for i in range(len(train_dataset_list)):
 for i in range(len(test_dataset_list)):
     test_split += len(test_dataset_list[i])
 
-# length = len(dataset)
-# train_split = math.floor(length*train_split_ration)
-# test_split = length - train_split
-# train_inds, test_inds = torch.utils.data.random_split(
-# dataset, [train_split, test_split], generator=torch.Generator().manual_seed(42))
+#length = len(dataset)
+#train_split = math.floor(length*train_split_ration)
+#test_split = length - train_split
+#train_inds, test_inds = torch.utils.data.random_split(
+#    dataset, [train_split, test_split], generator=torch.Generator().manual_seed(42))
 
-
-print(r"{:-^30}".format("PID"), file=inf_f)
-print(r"{txt:<20}:{val}".format(txt="pid", val=os.getpid()), file=inf_f)
-print(r"{:-^30}".format("Location"), file=inf_f)
-print(r"{txt:<20}:{val}".format(txt="folder name", val=save_path), file=inf_f)
-print(r"{:-^30}".format("Parameters"), file=inf_f)
-print(r"{txt:<20}:{val}".format(txt="layers", val=layers), file=inf_f)
-print(r"{txt:<20}:{val}".format(txt="target", val=target), file=inf_f)
-print(r"{txt:<20}:{val}".format(txt="batch size", val=batch_size), file=inf_f)
-print(r"{txt:<20}:{val}".format(txt="epochs", val=num_epochs), file=inf_f)
-print(r"{txt:<20}:{val:.1e}".format(txt="lr", val=lr), file=inf_f)
-print(r"{txt:<20}:{val}".format(txt="generate XY", val=locXY), file=inf_f)
-print(r"{txt:<20}:{val}".format(txt="residu", val=residu), file=inf_f)
-print(r"{txt:<20}:{val}".format(txt="device", val=device), file=inf_f)
-print(r"{txt:<20}:{val}".format(
-    txt="img channels", val=imgChannels), file=inf_f)
-print(r"{txt:<20}:{val}".format(txt="addX", val=addX), file=inf_f)
-print(r"{:-^30}".format(""), file=inf_f)
-print(r"{txt:<20}:{val1:d}/{val2:d}".format(txt="data split:",
-    val1=int(train_split_ration*100), val2=int(100-train_split_ration*100)), file=inf_f)
-print(r"{txt:<20}:{val}".format(
-    txt="train samples", val=train_split), file=inf_f)
-print(r"{txt:<20}:{val}".format(txt="test samples", val=test_split), file=inf_f)
-print(r"{txt:<20}:{val}".format(txt="total",
-    val=train_split+test_split), file=inf_f)
-print(r"{:-^30}".format("Model"), file=inf_f)
 
 train_data_list = list()
 test_data_list = list()
@@ -188,10 +162,7 @@ for test_dataset in test_dataset_list:
 init_time = datetime.now()
 net = VAE(imgChannels=imgChannels, layers=layers, residu=residu, addX=addX).to(device)
 
-print(net, file=inf_f)
-print(r"{:-^30}".format("Optimiser"), file=inf_f)
 optimizer = torch.optim.Adam(net.parameters(), lr=lr)
-print(optimizer, file=inf_f)
 inf_f.flush()
 printed_stat = True
 saved_epoch = 0
@@ -199,69 +170,49 @@ saved_epoch = 0
 loss = 0
 min_loss = 1000
 l1 = 0
-print('total_time,epoch_time,epoch,loss', file=lss_train_f)
-print('total_time,epoch_time,epoch,loss', file=lss_test_f)
 
-len_train_data = 0
-for i in train_data_list:
-    len_train_data += len(i)
-    
+
 len_test_data = 0
-for i in test_data_list:
-    len_test_data += len(i)
+for i in range(len(test_data_list)):
+    len_test_data += len(test_data_list)
+
 
 for epoch in range(num_epochs):
     last_time = datetime.now()
     loss1 = 0
     kl_divergence1 = 0
     net.train()
+    fig, axs = plt.subplots(3, 3, figsize=(6, 6), layout='constrained')
     for train_data in train_data_list:
         for idx, data in enumerate(train_data, 0):
-            out = net(data[0], tar-3)
-            loss = F.mse_loss(out, data[tar].unsqueeze(1))
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            loss1 += loss.item()
-
-    loss1 = loss1/len_train_data
-    print('{},{},{},{}'.format(datetime.now()-init_time, datetime.now()-last_time,epoch, loss1), file=lss_train_f)
-
-    l2 = 0
-    last_time = datetime.now()
-    net.eval()
-    for test_data in test_data_list:
-        for data in test_data:
-            out = net(data[0], tar-3)
-            if epoch == 1:
-                cmp = data[tar-2]
-                # print((data[3].shape))
-                l1 += F.mse_loss(data[tar], cmp).item()
-            l2 += F.mse_loss(data[tar].unsqueeze(1), out).item()
-            
-    l2 = l2/len_test_data
-    if l2 < min_loss:
-        min_loss = l2
-        torch.save(net.state_dict(), params_path)
-        saved_epoch = epoch
-    if epoch == 1:
-        l1 = l1/len_test_data
-        print("CMP:", l1, file=inf_f)
-        inf_f.flush()
-    print('{},{},{},{}'.format(datetime.now()-init_time, datetime.now()-last_time,epoch, l2), file=lss_test_f)
-    lss_test_f.flush()
-    lss_train_f.flush()
-    if l2 < l1 and printed_stat:
-        printed_stat = False
-        print(r"test loss < cmp loss @ {}".format(epoch), file=sts_f)
-
-
-print(r"Cmp loss                :{}".format(l1), file=sts_f)
-print(r"Min test loss           :{}".format(min_loss), file=sts_f)
-print(r"Min test loss at epoch  :{}".format(saved_epoch), file=sts_f)
-
-
-inf_f.close()
-lss_train_f.close()
-lss_test_f.close()
-sts_f.close()
+            print(type(data[0][0].cpu().detach().numpy()))
+            im = axs[0,0].imshow(data[0][0][0].cpu().detach().numpy())
+            im2 = axs[0,1].imshow(data[0][0][1].cpu().detach().numpy())
+            axs[0,2].imshow(data[0][0][2].cpu().detach().numpy())
+            axs[1,0].imshow(data[0][0][3].cpu().detach().numpy())
+            axs[1,1].imshow(data[0][0][4].cpu().detach().numpy())
+            axs[1,2].imshow(data[0][0][5].cpu().detach().numpy())
+            axs[2,0].imshow(data[0][0][6].cpu().detach().numpy())
+            im8 = axs[2,1].imshow(data[0][0][7].cpu().detach().numpy())
+            im9 = axs[2,2].imshow(data[0][0][8].cpu().detach().numpy())
+            axs[0,2].text(12, 12,str(np.mean((data[0][0][2].cpu().detach().numpy()))),ha='center', va='center',c="white")
+            axs[1,0].text(12, 12,str(np.mean((data[0][0][3].cpu().detach().numpy()))),ha='center', va='center',c="white")
+            axs[1,1].text(12, 12,str(np.mean((data[0][0][4].cpu().detach().numpy()))),ha='center', va='center',c="white")
+            axs[1,2].text(12, 12,str(np.mean((data[0][0][5].cpu().detach().numpy()))),ha='center', va='center',c="white")
+            axs[2,0].text(12, 12,str(np.mean((data[0][0][6].cpu().detach().numpy()))),ha='center', va='center',c="white")
+            plt.colorbar(im, ax=axs[0, 0])
+            plt.colorbar(im2, ax=axs[0, 1])
+            plt.colorbar(im8, ax=axs[2, 1])
+            plt.colorbar(im9, ax=axs[2, 2])
+            axs[0,0].set_title("Potential")
+            axs[0,1].set_title("Charge")
+            axs[0,2].set_title("VD")
+            axs[1,0].set_title("VG")
+            axs[1,1].set_title("Location")
+            axs[1,2].set_title("Height")
+            axs[2,0].set_title("Width")
+            axs[2,1].set_title("X Location Map")
+            axs[2,2].set_title("Y Location Map")
+        
+            fig.savefig("testing_data_loader.png")
+            quit()

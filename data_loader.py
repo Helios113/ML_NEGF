@@ -16,18 +16,18 @@ class NEFGSet(Dataset):
         self.mode = use_dimension
 
     def __len__(self):
-        return self.df.size
+        return len(self.df.index)
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
         plane = self.df.iloc[idx]["Plane"]
-        shape = (0, 0)
+        shape = [0, 0]
 
         x_val = ((20 + 2) * 5) + 1
-        y_val = (((self.df.iloc[idx]["Height"]) + 2) * 5) + 1
-        z_val = (((self.df.iloc[idx]["Width"]) + 2) * 5) + 1
+        z_val = (((self.df.iloc[idx]["Height"]) + 2) * 5) + 1
+        y_val = (((self.df.iloc[idx]["Width"]) + 2) * 5) + 1
 
         if plane == "XY":
             shape[0] = x_val
@@ -41,19 +41,18 @@ class NEFGSet(Dataset):
 
         tmpList = []
         dat = []
-
         tmpList.append(
-            torch.from_numpy(np.loadtxt(self.df.iloc[idx]["inpPotPath"])).to(
+            torch.from_numpy(np.loadtxt(self.df.iloc[idx]["inpPotPath"], dtype=np.float32)).to(
                 self.device
             )
         )  # Load POT File
-
+        
         tmpList.append(
-            torch.from_numpy(np.loadtxt(self.df.iloc[idx]["inpChargePath"])).to(
+            torch.from_numpy(np.loadtxt(self.df.iloc[idx]["inpChargePath"], dtype=np.float32)).to(
                 self.device
             )
         )  # Load CHARGE file
-
+        
         tmpList.append(torch.full(shape, self.df.iloc[idx]["VD"]).to(self.device))  # VD
         tmpList.append(torch.full(shape, self.df.iloc[idx]["VG"]).to(self.device))  # VG
         tmpList.append(
@@ -62,10 +61,10 @@ class NEFGSet(Dataset):
 
         if self.mode:
             tmpList.append(
-                torch.full(self.shape, self.df.iloc[idx]["Height"]).to(self.device)
+                torch.full(shape, self.df.iloc[idx]["Height"]).to(self.device)
             )  # Add Height
             tmpList.append(
-                torch.full(self.shape, self.df.iloc[idx]["Width"]).to(self.device)
+                torch.full(shape, self.df.iloc[idx]["Width"]).to(self.device)
             )  # Add Width
 
         tmpList.append(
@@ -88,18 +87,25 @@ class NEFGSet(Dataset):
         imp = torch.stack(tuple(tmpList), dim=0)
 
         dat.append(imp)
-
-        for i in range(8):
-            # Appends cmp and tar filepaths, as well as mean and standard deviation
+        
+        for i in range(4):
+            # Appends cmp and tar filepaths
             dat.append(
-                torch.from_numpy(np.loadtxt(self.df.iloc[idx, i + 9])).to(self.device)
+                torch.from_numpy(np.loadtxt(self.df.iloc[idx, i + 11], dtype=np.float32)).to(self.device)
             )
+            
+        for i in range(4):
+            # Appends mean and std
+            dat.append(
+                self.df.iloc[idx, i + 15]
+            )
+            
         for i in range(3):
             # Appends VG, VD, Location
-            dat.append(self.df.iloc[idx, i + 1])
+            dat.append(self.df.iloc[idx, i + 3])
 
         for i in range(2):
             # Appends height and width
-            dat.append(self.df.iloc[idx, i + 5])
+            dat.append(self.df.iloc[idx, i + 7])
 
         return dat

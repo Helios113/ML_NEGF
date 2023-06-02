@@ -4,8 +4,8 @@ class query_data:
     def __init__(self, querypath,datapath):
         self.querypath = querypath
         self.datapath = datapath
-        self.df = None
-        self.queries = None
+        self.df = pd.DataFrame()
+        self.queries = {}
 
 
     
@@ -25,6 +25,7 @@ class query_data:
         # reads query from string and converts to consise info for df
         VG = None
         VD = None
+        Location = None
         if str(args["VG"]).upper() == "ALL":
             VG = self.df["VG"].unique() # type: ignore
         elif "," in str(args["VG"]):
@@ -46,11 +47,21 @@ class query_data:
             VD1 = str(args["VD"]).split("-")
             VD1 = [float(x) for x in VD1]
             VD = [x for x in self.df["VD"].unique() if (x >= VD1[0]) and (x <= VD1[1])]
-            print(VD)
         elif type(args["VD"]) == float:
             VD = [args["VD"]]
         
-        return VG, VD
+        if str(args["Location"]).upper() == "ALL":
+            Location = self.df["Location"].unique()
+        elif "," in str(args["Location"]):
+            Location = str(args["Location"]).split(",")
+            Location = [float(x) for x in Location]
+        elif "-" in str(args["Location"]):
+            Loc1 = str(args["Location"]).split("-")
+            Location = [x for x in range(Loc1[0],Loc1[1])]
+        elif type(args["Location"]) == int:
+            Location = [args["Location"]]
+        
+        return VG, VD, Location
    
     
     
@@ -59,16 +70,20 @@ class query_data:
     # the conditions in the query i.e. Height width if we are searching for a percentage and what that percentage is and if we are searching
     # for VD of VG and the given value for VG/VD
     def query_search(self):
+        trainingDF = list()
+        testingDF = list()
+        
         self.read_data()
         for key in self.queries:
             prevkey = key
-            totalDF = pd.DataFrame()
             for key in self.queries[key]:
+                totalDF = pd.DataFrame()
+                selectedDf = pd.DataFrame()
                 args = self.queries[prevkey][key]
-                
-                VG, VD = self.query_trans(args)
+                VG, VD, Location = self.query_trans(args)
                 ShapedDF = self.df[(self.df["Height"] == args["Height"]) & (self.df["Width"] == args["Width"]) & (self.df["Criteria"] == args["Criteria"])
-                            & (self.df["VG"].isin(VG)) & (self.df["VD"].isin(VD))]
+                            & (self.df["VG"].isin(VG)) & (self.df["VD"].isin(VD)) & (self.df["Plane"] == args["Plane"])
+                            & (self.df["Location"].isin(Location))]
                 condition = args["Condition"]
                 condition = str(condition)
                 if condition.upper() == "ALL":
@@ -94,13 +109,21 @@ class query_data:
             
                 if condition.isnumeric():
                     self.df = self.df.drop(selectedDf.head()[0])
-                    pass
+                    selectedDf = pd.DataFrame(selectedDf).transpose()
+                    totalDF = pd.concat([totalDF,selectedDf])
                 else:
                     self.df = self.df.drop(index)
-                totalDF = totalDF.append(selectedDf)
+                    totalDF = pd.concat([totalDF,selectedDf])
                 if prevkey == "training":
-                    trainingDF = totalDF
+                    trainingDF.append(totalDF)
                 else:
-                    testingDF = totalDF
+                    testingDF.append(totalDF)
 
         return trainingDF,testingDF
+
+
+# query = query_data("query.yaml","cond_data/dataframe_conditioned.csv")
+# train,test = query.query_search()
+
+# print(train)
+# print(test)
