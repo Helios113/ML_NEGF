@@ -12,11 +12,11 @@
             "console": "integratedTerminal",
             "args": [
                 "--query_path",
-                "query.yaml",
+                "query_2.yaml",
                 "--cond_data_path",
                 "cond_data/dataframe_conditioned.csv",
                 "--name",
-                "test1",
+                "test10",
                 "--res",
                 "res",
                 "--tar",

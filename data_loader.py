@@ -29,16 +29,20 @@ class NEFGSet(Dataset):
         x_val = ((20 + 2) * 5) + 1
         z_val = (((self.df.iloc[idx]["Height"]) + 2) * 5) + 1
         y_val = (((self.df.iloc[idx]["Width"]) + 2) * 5) + 1
+        maxLoc = 0
 
         if plane == "XY":
             shape[0] = x_val
             shape[1] = y_val
+            maxLoc = z_val
         elif plane == "YZ":
             shape[0] = y_val
             shape[1] = z_val
+            maxLoc = x_val
         elif plane == "ZX":
             shape[0] = z_val
             shape[1] = x_val
+            maxLoc = y_val
 
         tmpList = []
         dat = []
@@ -56,9 +60,13 @@ class NEFGSet(Dataset):
         
         tmpList.append(torch.full(shape, self.df.iloc[idx]["VD"]).to(self.device))  # VD
         tmpList.append(torch.full(shape, self.df.iloc[idx]["VG"]).to(self.device))  # VG
+        
         tmpList.append(
-            torch.full(shape, self.df.iloc[idx]["Location"]).to(self.device)
+            torch.full(shape, self.df.iloc[idx]["Location"]/maxLoc).to(self.device)
         )  # Location
+        
+        print(self.df.iloc[idx]["Location"]/maxLoc)
+        print(shape, maxLoc)
 
         if self.mode:
             tmpList.append(
