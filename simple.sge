@@ -12,7 +12,7 @@
 #  Lines starting #$ contain directives to GE, which tell it how to run the job.
 #  Other lines starting # are comments, and are ignored by GE.
 
-#$ -N Test                     # Name of the job
+#$ -N test3noBatchDrop5                     # Name of the job
 #$ -q college.q@@college-gpu                 # Queue in which to run job
 #$ -l mem_tokens=4G               # 1 GB memory
 #$ -cwd                           # Run in current working directory
@@ -23,4 +23,4 @@
 
 source /home/staff/pa112h/spack/opt/spack/linux-centos7-zen2/gcc-9.3.0/anaconda3-2022.10-j2pawrzvhsnvudtg2pm3dutcteggzuvp/bin/activate fed.venv
 export MKL_DEBUG_CPU_TYPE=5
-python main.py --query_path query_2.yaml --cond_data_path cond_data/dataframe_conditioned.csv --name test2_l --res res --tar pot --gpu --epochs 700 --batch False --drop 0.3
+python main.py --query_path query_3.yaml --cond_data_path cond_data/dataframe_conditioned.csv --name test3_nobatch_05 --res res --tar pot --gpu --epochs 700 --batch False --drop 0.5

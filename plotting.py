@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-tar_dir = "test2_l"
+tar_dir = "test2_nobatch_03"
 cut = 0 # ZERO FOR FULL GRAPH
 
 # DATA COLLECTION
