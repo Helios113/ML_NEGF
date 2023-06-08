@@ -12,14 +12,14 @@
 #  Lines starting #$ contain directives to GE, which tell it how to run the job.
 #  Other lines starting # are comments, and are ignored by GE.
 
-#$ -N query6                # Name of the job
-#$ -q staff.q               # Queue in which to run job
+#$ -N query1                                      # Name of the job
+#$ -q staff.q                                     # Queue in which to run job
 #$ -l mem_tokens=4G               # 1 GB memory
 #$ -cwd                           # Run in current working directory
-#$ -o res3/q6_b3v_loc/out-$JOB_ID.log             # File to which standard output should be sent, with job number in filename
-#$ -e res3/q6_b3v_loc/err-$JOB_ID.log             # File for standard error, with job nubmer in filename
+#$ -o bailey/bailey1/out-$JOB_ID.log             # File to which standard output should be sent, with job number in filename
+#$ -e bailey/bailey1/err-$JOB_ID.log             # File for standard error, with job nubmer in filename
 #$ -M 2564188h@student.gla.ac.uk   # Your email address
 #$ -m beas			  # The things to send you emails for: begin, end, abort, suspend
 
 source /home/staff/pa112h/spack/opt/spack/linux-centos7-zen2/gcc-9.3.0/anaconda3-2022.10-j2pawrzvhsnvudtg2pm3dutcteggzuvp/bin/activate fed.venv
-python main.py --query_path query_6.yaml --cond_data_path cond_data/dataframe_conditioned.csv --res res3 --tar pot --gpu --name q6_b3v_loc --epochs 250 --drop 0.3 --batch True --noise False --locat True
+python main.py --query_path query_1.yaml --cond_data_path cond_data/dataframe_conditioned.csv --res bailey --tar pot --gpu --name bailey1 --epochs 250 --drop 0.3

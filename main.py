@@ -67,11 +67,12 @@ parser.add_argument('--res', action='store', default="results",
 
 parser.add_argument('--drop', action='store', default=0.5,
                     type=float, help='Dropout value between 0 and 1')
-parser.add_argument('--batch', action='store_true', default="True")
 
-parser.add_argument('--noise', action='store_true', default="True")
+parser.add_argument('--batch', action='store_true', default=True)
 
-parser.add_argument('--locat', action='store_true', default="True")
+parser.add_argument('--noise', action='store_true', default=False)
+
+parser.add_argument('--locat', action='store_true', default=True)
 
 args = parser.parse_args()
 
@@ -145,10 +146,10 @@ train_dataset_list = list()
 test_dataset_list = list()
 
 for df in dataframe1:
-    train_dataset_list.append(NEFGSet(df, use_dimension=True, use_location=location, use_noise=noise, device=device))
+    train_dataset_list.append(NEFGSet(df, use_dimension=False, use_location=location, use_noise=noise, device=device))
 
 for df in dataframe2:
-    test_dataset_list.append(NEFGSet(df, use_dimension=True, use_location=location, use_noise=False, device=device))
+    test_dataset_list.append(NEFGSet(df, use_dimension=False, use_location=location, use_noise=False, device=device))
 
 imgChannels = train_dataset_list[0][0][0].shape[0]
 # Split data into training and validation sets
@@ -236,7 +237,12 @@ for epoch in range(num_epochs):
     net.train()
     for train_data in train_data_list:
         for data in train_data:
+            print(data)
+            print(len(data))
             optimizer.zero_grad()
+            print(optimizer)
+            print(len(data[0]))
+            print(data[tar])
             out = net(data[0], tar-3)
             loss = F.mse_loss(out, data[tar].unsqueeze(1))
             loss.backward()

@@ -11,7 +11,7 @@ torch.manual_seed(42)
 class NEFGSet(Dataset):
     # This class should be used to create PyTorch compatible objects from a given dataframe
 
-    def __init__(self, df, use_dimension=True, use_location="False", use_noise=False, device="mps"):
+    def __init__(self, df, use_dimension=False, use_location=True, use_noise=False, device="mps"):
         self.df = df.reset_index()
         self.device = device
         self.mode = use_dimension
@@ -68,11 +68,10 @@ class NEFGSet(Dataset):
         
         if self.location:
             tmpList.append(
-                torch.full(shape, self.df.iloc[idx]["Location"]/maxLoc).to(self.device)
+                torch.full(shape, self.df.iloc[idx]["Location"]).to(self.device)
             )  # Location
         
-        # print(self.df.iloc[idx]["Location"]/maxLoc)
-
+        # REMOVE THESE (IN THE RUNNING)
         if self.mode:
             tmpList.append(
                 torch.full(shape, self.df.iloc[idx]["Height"]).to(self.device)

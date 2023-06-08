@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os 
 
-subdirs = [x[0] for x in os.walk('paa1') if x[0] != 'paa1']
+subdirs = [x[0] for x in os.walk('bailey') if x[0] != 'bailey']
 
 for dir in subdirs:
     try:
