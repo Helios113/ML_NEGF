@@ -5,16 +5,16 @@ training:
         Criteria: abs_pot
         Plane: XY
         Condition: 100%
-        VD: 0.425
+        VD: 0.05, 0.425, 0.8
         VG: ALL
         Location: ALL
     B:
         Height: 3
-        Width: 3
+        Width: 6
         Criteria: abs_pot
         Plane: XY
-        Condition: 10%
-        VD: 0.425
+        Condition: 100%
+        VD: 0.05, 0.425, 0.8
         VG: ALL
         Location: ALL
 testing:
@@ -23,7 +23,7 @@ testing:
         Width: 3
         Criteria: abs_pot
         Plane: XY
-        Condition: ALL
-        VD: 0.425
+        Condition: 100%
+        VD: 0.05, 0.425, 0.8
         VG: ALL
         Location: ALL

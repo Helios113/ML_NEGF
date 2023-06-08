@@ -5,23 +5,33 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: main.py",
+              "name": "Python: main.py",
             "type": "python",
             "request": "launch",
             "program": "main.py",
             "console": "integratedTerminal",
             "args": [
                 "--query_path",
-                "query_2.yaml",
+                "query_5.yaml",
                 "--cond_data_path",
                 "cond_data/dataframe_conditioned.csv",
                 "--name",
-                "test10",
+                "debug",
                 "--res",
-                "res",
+                "res2",
                 "--tar",
                 "pot",
-                "--gpu"
+                "--gpu",
+                "--epochs",
+                "250",
+                "--batch",
+                "False",
+                "--drop",
+                "0.3",
+                "--noise",
+                "False",
+                "--locat",
+                "True",
             ],
             "justMyCode": true
         }

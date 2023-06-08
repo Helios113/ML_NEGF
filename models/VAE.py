@@ -7,7 +7,7 @@ A Convolutional Variational Autoencoder
 """
 class VAE(nn.Module):
     # ther og net had 128 final channels
-    def __init__(self, imgChannels=3, layers = [16,32,64,64], residu = {}, addX = True, use_batch=True, dropout=0.5):
+    def __init__(self, imgChannels=3, layers=[16,32,64,64], residu={}, addX=True, use_batch=True, dropout=0.5):
         super(VAE, self).__init__()
 
         self.enc_modules = nn.ModuleList()
@@ -16,6 +16,7 @@ class VAE(nn.Module):
         self.addX = addX
         inChannels = imgChannels
         outChannels = layers[0]
+        
         for i in layers:
             if use_batch:
                 self.enc_modules.append(

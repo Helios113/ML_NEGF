@@ -4,7 +4,7 @@ training:
         Width: 12
         Criteria: abs_pot
         Plane: XY
-        Condition: 70%
+        Condition: ALL
         VD: ALL
         VG: ALL
         Location: ALL

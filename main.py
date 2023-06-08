@@ -63,12 +63,15 @@ parser.add_argument('--tar', required=True,choices=['pot', 'charge'], action='st
 parser.add_argument('--res', action='store', default="results",
                     type=str, help='Folder name for parent dir')
 
-parser.add_argument('--batch', action='store', default=True,
-                    type=bool, help='Boolean to use batch norm')
+
 
 parser.add_argument('--drop', action='store', default=0.5,
                     type=float, help='Dropout value between 0 and 1')
+parser.add_argument('--batch', action='store_true', default="True")
 
+parser.add_argument('--noise', action='store_true', default="True")
+
+parser.add_argument('--locat', action='store_true', default="True")
 
 args = parser.parse_args()
 
@@ -81,15 +84,21 @@ query_path = args.query_path
 batch_size = args.batch_size
 batch_use = args.batch
 dropout_val = args.drop
+location = args.locat
+noise = args.noise
 num_epochs = args.epochs
 lr = args.lr
+
 locXY = args.notLocXY
+
 residu = {}
 for i in args.residu:
     residu[i] = None
 train_split_ration = args.split
 gpu_support = args.gpu
 addX = args.addX
+
+
 layers = args.layers
 target = args.tar
 tar = int(target=="charge")+3 # 4 if pot, 3 if charge
@@ -110,7 +119,7 @@ stats_path = os.path.join(save_path, "stats.txt")
 
 
 """
-Fiels
+Files
 """
 if not os.path.exists(save_path):
     os.makedirs(save_path)
@@ -129,19 +138,19 @@ elif torch.backends.mps.is_available() and gpu_support:
 else:
     device = "cpu"  # Defaults to CPU if NVIDIA GPU/Apple GPU aren't available
 
-query = query_data(querypath=query_path,datapath=condiditioned_path)
-dataframe1, dataframe2 = query.query_search()
+query = query_data(condiditioned_path)
+dataframe1, dataframe2 = query.query_search(query_path)
 
 train_dataset_list = list()
 test_dataset_list = list()
 
 for df in dataframe1:
-    train_dataset_list.append(NEFGSet(df, device=device))
+    train_dataset_list.append(NEFGSet(df, use_dimension=True, use_location=location, use_noise=noise, device=device))
 
 for df in dataframe2:
-    test_dataset_list.append(NEFGSet(df, device=device))
+    test_dataset_list.append(NEFGSet(df, use_dimension=True, use_location=location, use_noise=False, device=device))
 
-imgChannels = 9
+imgChannels = train_dataset_list[0][0][0].shape[0]
 # Split data into training and validation sets
 
 # Used in printing no. of samples from each set
@@ -157,7 +166,6 @@ for i in range(len(test_dataset_list)):
 # train_inds, test_inds = torch.utils.data.random_split(
 # dataset, [train_split, test_split], generator=torch.Generator().manual_seed(42))
 
-
 print(r"{:-^30}".format("PID"), file=inf_f)
 print(r"{txt:<20}:{val}".format(txt="pid", val=os.getpid()), file=inf_f)
 print(r"{:-^30}".format("Location"), file=inf_f)
@@ -169,6 +177,9 @@ print(r"{txt:<20}:{val}".format(txt="batch size", val=batch_size), file=inf_f)
 print(r"{txt:<20}:{val}".format(txt="epochs", val=num_epochs), file=inf_f)
 print(r"{txt:<20}:{val:.1e}".format(txt="lr", val=lr), file=inf_f)
 print(r"{txt:<20}:{val}".format(txt="generate XY", val=locXY), file=inf_f)
+print(r"{txt:<20}:{val}".format(txt="Batch Norm", val=batch_use), file=inf_f)
+print(r"{txt:<20}:{val}".format(txt="Noise in the input", val=noise), file=inf_f)
+print(r"{txt:<20}:{val}".format(txt="Loc in 3rd dim", val=location), file=inf_f)
 print(r"{txt:<20}:{val}".format(txt="residu", val=residu), file=inf_f)
 print(r"{txt:<20}:{val}".format(txt="device", val=device), file=inf_f)
 print(r"{txt:<20}:{val}".format(
@@ -224,17 +235,24 @@ for epoch in range(num_epochs):
     kl_divergence1 = 0
     net.train()
     for train_data in train_data_list:
-        for idx, data in enumerate(train_data, 0):
+        for data in train_data:
+            optimizer.zero_grad()
             out = net(data[0], tar-3)
             loss = F.mse_loss(out, data[tar].unsqueeze(1))
-            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+
+            if epoch == 1:
+                cmp = data[tar-2]
+                l1 += F.mse_loss(data[tar], cmp).item()
             loss1 += loss.item()
 
     loss1 = loss1/len_train_data
+    if epoch == 1:
+        print("CMP_train:", l1/len_train_data, file=inf_f)
+        inf_f.flush()
     print('{},{},{},{}'.format(datetime.now()-init_time, datetime.now()-last_time,epoch, loss1), file=lss_train_f)
-
+    l1 = 0
     l2 = 0
     last_time = datetime.now()
     net.eval()
@@ -243,9 +261,8 @@ for epoch in range(num_epochs):
             out = net(data[0], tar-3)
             if epoch == 1:
                 cmp = data[tar-2]
-                # print((data[3].shape))
                 l1 += F.mse_loss(data[tar], cmp).item()
-            l2 += F.mse_loss(data[tar].unsqueeze(1), out).item()
+            l2 += F.mse_loss(out, data[tar].unsqueeze(1)).item()
             
     l2 = l2/len_test_data
     if l2 < min_loss:
@@ -254,7 +271,7 @@ for epoch in range(num_epochs):
         saved_epoch = epoch
     if epoch == 1:
         l1 = l1/len_test_data
-        print("CMP:", l1, file=inf_f)
+        print("CMP_test:", l1, file=inf_f)
         inf_f.flush()
     print('{},{},{},{}'.format(datetime.now()-init_time, datetime.now()-last_time,epoch, l2), file=lss_test_f)
     lss_test_f.flush()

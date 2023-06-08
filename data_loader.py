@@ -11,11 +11,13 @@ torch.manual_seed(42)
 class NEFGSet(Dataset):
     # This class should be used to create PyTorch compatible objects from a given dataframe
 
-    def __init__(self, df, use_dimension=True, device="mps"):
+    def __init__(self, df, use_dimension=True, use_location="False", use_noise=False, device="mps"):
         self.df = df.reset_index()
         self.device = device
         self.mode = use_dimension
-
+        self.noise = use_noise
+        self.location = use_location
+        
     def __len__(self):
         return len(self.df.index)
 
@@ -46,27 +48,30 @@ class NEFGSet(Dataset):
 
         tmpList = []
         dat = []
+        Noise = 0
+        if self.noise:
+            Noise = (torch.randn(shape)* 0.1 + 0).to(self.device) #0.1 = std and 0 is mean for gausian noise 
+        
         tmpList.append(
-            torch.from_numpy(np.loadtxt(self.df.iloc[idx]["inpPotPath"], dtype=np.float32)).to(
-                self.device
-            )
+            
+        torch.from_numpy(np.loadtxt(self.df.iloc[idx]["inpPotPath"], dtype=np.float32)).to(
+                self.device) + Noise
         )  # Load POT File
         
         tmpList.append(
             torch.from_numpy(np.loadtxt(self.df.iloc[idx]["inpChargePath"], dtype=np.float32)).to(
-                self.device
-            )
+                self.device) + Noise
         )  # Load CHARGE file
         
         tmpList.append(torch.full(shape, self.df.iloc[idx]["VD"]).to(self.device))  # VD
-        tmpList.append(torch.full(shape, self.df.iloc[idx]["VG"]).to(self.device))  # VG
+        tmpList.append(torch.full(shape, self.df.iloc[idx]["VG"]).to(self.device) )  # VG
         
-        tmpList.append(
-            torch.full(shape, self.df.iloc[idx]["Location"]/maxLoc).to(self.device)
-        )  # Location
+        if self.location:
+            tmpList.append(
+                torch.full(shape, self.df.iloc[idx]["Location"]/maxLoc).to(self.device)
+            )  # Location
         
-        print(self.df.iloc[idx]["Location"]/maxLoc)
-        print(shape, maxLoc)
+        # print(self.df.iloc[idx]["Location"]/maxLoc)
 
         if self.mode:
             tmpList.append(
@@ -92,10 +97,11 @@ class NEFGSet(Dataset):
                 / shape[1]
             ).to(self.device)
         )
+            
 
         imp = torch.stack(tuple(tmpList), dim=0)
 
-        dat.append(imp)
+        dat.append(imp) 
         
         for i in range(4):
             # Appends cmp and tar filepaths

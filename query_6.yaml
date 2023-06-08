@@ -13,17 +13,17 @@ training:
         Width: 3
         Criteria: abs_pot
         Plane: XY
-        Condition: 10%
+        Condition: 100%
         VD: 0.425
         VG: ALL
         Location: ALL
 testing:
     C:
         Height: 3
-        Width: 3
+        Width: 6
         Criteria: abs_pot
         Plane: XY
-        Condition: ALL
+        Condition: 100%
         VD: 0.425
         VG: ALL
         Location: ALL
