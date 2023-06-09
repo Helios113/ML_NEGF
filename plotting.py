@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-main_dir= 'paa1'
-tar_dir = "preslav1"
+main_dir= 'bailey'
+tar_dir = "bailey1"
 cut = 0 # ZERO FOR FULL GRAPH
 
 # DATA COLLECTION
@@ -11,7 +11,12 @@ train_dat = pd.read_csv("/home/staff/pa112h/Projects/ML_NEGF/{}/{}/loss_train.tx
 
 cmpFile = open("/home/staff/pa112h/Projects/ML_NEGF/{}/{}/info.txt".format(main_dir,tar_dir))
 cmp = cmpFile.readlines()[-1]
-cmp = round(float(cmp.split(' ')[1].replace('\n','')),6)
+
+try: 
+    cmp = round(float(cmp.split(' ')[1].replace('\n','')),6)
+except IndexError as e:
+    cmp = 0
+    print("FAILED TO FIND COMPARE VALUE")
 cmpFile.close()
 
 y_test = test_dat.iloc[cut:,3]

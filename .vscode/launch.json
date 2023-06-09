@@ -16,7 +16,7 @@
                 "--cond_data_path",
                 "cond_data/dataframe_conditioned.csv",
                 "--name",
-                "bailey1",
+                "bailey6",
                 "--res",
                 "bailey",
                 "--tar",

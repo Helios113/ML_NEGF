@@ -68,11 +68,11 @@ parser.add_argument('--res', action='store', default="results",
 parser.add_argument('--drop', action='store', default=0.5,
                     type=float, help='Dropout value between 0 and 1')
 
-parser.add_argument('--batch', action='store_true', default=True)
+parser.add_argument('--batch', action=argparse.BooleanOptionalAction, default=True)
 
-parser.add_argument('--noise', action='store_true', default=False)
+parser.add_argument('--noise', action=argparse.BooleanOptionalAction, default=False)
 
-parser.add_argument('--locat', action='store_true', default=True)
+parser.add_argument('--locat', action=argparse.BooleanOptionalAction, default=True)
 
 args = parser.parse_args()
 
@@ -223,12 +223,13 @@ print('total_time,epoch_time,epoch,loss', file=lss_train_f)
 print('total_time,epoch_time,epoch,loss', file=lss_test_f)
 
 len_train_data = 0
-for i in train_data_list:
-    len_train_data += len(i)
+for train_data in train_data_list:
+    len_train_data += len(train_data)
     
 len_test_data = 0
-for i in test_data_list:
-    len_test_data += len(i)
+for test_data in test_data_list:
+    len_test_data += len(test_data)
+
 
 for epoch in range(num_epochs):
     last_time = datetime.now()
@@ -237,15 +238,14 @@ for epoch in range(num_epochs):
     net.train()
     for train_data in train_data_list:
         for data in train_data:
-            print(data)
-            print(len(data))
             optimizer.zero_grad()
-            print(optimizer)
-            print(len(data[0]))
-            print(data[tar])
+            # print(data)
+            # print(data[0])
+            # print(len(data)) # 14
+            # print(len(data[0])) # 32
             out = net(data[0], tar-3)
             loss = F.mse_loss(out, data[tar].unsqueeze(1))
-            loss.backward()
+            loss.backward() 
             optimizer.step()
 
             if epoch == 1:
@@ -255,7 +255,7 @@ for epoch in range(num_epochs):
 
     loss1 = loss1/len_train_data
     if epoch == 1:
-        print("CMP_train:", l1/len_train_data, file=inf_f)
+        print("CMP_train:", l1/len_train_data, file=inf_f) # somethings likely wrong with the loss calculation here
         inf_f.flush()
     print('{},{},{},{}'.format(datetime.now()-init_time, datetime.now()-last_time,epoch, loss1), file=lss_train_f)
     l1 = 0

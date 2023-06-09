@@ -71,7 +71,6 @@ class NEFGSet(Dataset):
                 torch.full(shape, self.df.iloc[idx]["Location"]).to(self.device)
             )  # Location
         
-        # REMOVE THESE (IN THE RUNNING)
         if self.mode:
             tmpList.append(
                 torch.full(shape, self.df.iloc[idx]["Height"]).to(self.device)
