@@ -8,6 +8,7 @@ import os
 from datetime import datetime, timedelta
 import pandas as pd
 from yaml_query import *
+import random
 
 torch.manual_seed(42)
 # Instantiate the parser
@@ -196,14 +197,19 @@ print(r"{txt:<20}:{val}".format(txt="total",
     val=train_split+test_split), file=inf_f)
 print(r"{:-^30}".format("Model"), file=inf_f)
 
-train_data_list = list()
-test_data_list = list()
-for train_dataset in train_dataset_list:
-    train_data_list.append(torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size,
+train_loaded_list = list()
+test_loaded_list = list()
+
+for train_data in train_dataset_list:
+    train_loaded_list += list(torch.utils.data.DataLoader(dataset=train_data, batch_size=batch_size,
                                         shuffle=True))
-for test_dataset in test_dataset_list:
-    test_data_list.append(torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size,
+random.shuffle(train_loaded_list)
+
+
+for test_data in test_dataset_list:
+    test_loaded_list += list(torch.utils.data.DataLoader(dataset=test_data, batch_size=batch_size,
                                         shuffle=True))
+random.shuffle(test_loaded_list)
 
 init_time = datetime.now()
 net = VAE(imgChannels=imgChannels, layers=layers, residu=residu, addX=addX, use_batch=batch_use, dropout=dropout_val).to(device)
@@ -222,13 +228,10 @@ l1 = 0
 print('total_time,epoch_time,epoch,loss', file=lss_train_f)
 print('total_time,epoch_time,epoch,loss', file=lss_test_f)
 
-len_train_data = 0
-for train_data in train_data_list:
-    len_train_data += len(train_data)
+
+len_train_data = len(train_loaded_list)
     
-len_test_data = 0
-for test_data in test_data_list:
-    len_test_data += len(test_data)
+len_test_data = len(test_loaded_list)
 
 
 for epoch in range(num_epochs):
@@ -236,22 +239,17 @@ for epoch in range(num_epochs):
     loss1 = 0
     kl_divergence1 = 0
     net.train()
-    for train_data in train_data_list:
-        for data in train_data:
-            optimizer.zero_grad()
-            # print(data)
-            # print(data[0])
-            # print(len(data)) # 14
-            # print(len(data[0])) # 32
-            out = net(data[0], tar-3)
-            loss = F.mse_loss(out, data[tar].unsqueeze(1))
-            loss.backward() 
-            optimizer.step()
+    for data in train_loaded_list:
+        optimizer.zero_grad()
+        out = net(data[0], tar-3)
+        loss = F.mse_loss(out, data[tar].unsqueeze(1))
+        loss.backward() 
+        optimizer.step()
 
-            if epoch == 1:
-                cmp = data[tar-2]
-                l1 += F.mse_loss(data[tar], cmp).item()
-            loss1 += loss.item()
+        if epoch == 1:
+            cmp = data[tar-2]
+            l1 += F.mse_loss(data[tar], cmp).item()
+        loss1 += loss.item()
 
     loss1 = loss1/len_train_data
     if epoch == 1:
@@ -262,13 +260,12 @@ for epoch in range(num_epochs):
     l2 = 0
     last_time = datetime.now()
     net.eval()
-    for test_data in test_data_list:
-        for data in test_data:
-            out = net(data[0], tar-3)
-            if epoch == 1:
-                cmp = data[tar-2]
-                l1 += F.mse_loss(data[tar], cmp).item()
-            l2 += F.mse_loss(out, data[tar].unsqueeze(1)).item()
+    for data in test_loaded_list:
+        out = net(data[0], tar-3)
+        if epoch == 1:
+            cmp = data[tar-2]
+            l1 += F.mse_loss(data[tar], cmp).item()
+        l2 += F.mse_loss(out, data[tar].unsqueeze(1)).item()
             
     l2 = l2/len_test_data
     if l2 < min_loss:
