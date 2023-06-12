@@ -21,6 +21,7 @@ class NEFGSet(Dataset):
         
     def __len__(self):
         return len(self.df.index)
+    
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
@@ -97,7 +98,7 @@ class NEFGSet(Dataset):
             ).to(self.device)
         )
             
-
+        
         imp = torch.stack(tuple(tmpList), dim=0)
 
         dat.append(imp) 
