@@ -46,7 +46,7 @@ def extended_query(string,df):
       shapeDF = df.query("Height == '{}' and Width == '{}' and {} == '{}'".format(height,width,VGVD[0],VGVD[1]))
       if selection[0].startswith("P"): #Percentage
          percent = int(selection[1])/100 
-         selectedDf = shapeDF.sample(frac = percent)
+         selectedDf = shapeDF.sample(frac=percent, random_state=0)
       elif selection[0].startswith("R"): #Range
          ranges = selection[1].split("to")
          start,stop = int(ranges[0]),int(ranges[1])

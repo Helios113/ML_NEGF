@@ -1,15 +1,20 @@
 import pandas as pd
 import yaml
+import numpy as np
 
+np.random.seed(0)
 
 class query_data:
+
     def __init__(self, datapath):
+        np.random.seed(0)
         self.datapath = datapath
         self.df = None
         self.read_data()
         self.queries = {}
 
     def read_data(self):
+        np.random.seed(0)
         self.df = pd.read_csv(
             self.datapath,
             header=0,
@@ -39,6 +44,7 @@ class query_data:
         # drop columns that only have NaNs
 
     def query_trans(self, args):
+        np.random.seed(0)
         # reads query from string and converts to consise info for df
         gate = None
         drain = None
@@ -80,6 +86,7 @@ class query_data:
         return gate, drain, Location
 
     def query_search(self, querypath):
+        np.random.seed(0)
         self.querypath = querypath
         with open(self.querypath, "r") as stream:
             try:

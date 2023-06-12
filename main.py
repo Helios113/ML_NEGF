@@ -5,11 +5,13 @@ from data_loader import NEFGSet
 from models.VAE import VAE
 import argparse
 import os
+import numpy as np
 from datetime import datetime, timedelta
 import pandas as pd
 from yaml_query import *
 
 torch.manual_seed(42)
+np.random.seed(0)
 # Instantiate the parser
 parser = argparse.ArgumentParser(description='ML_NEGF')
 
@@ -146,10 +148,10 @@ train_dataset_list = list()
 test_dataset_list = list()
 
 for df in dataframe1:
-    train_dataset_list.append(NEFGSet(df, use_dimension=False, use_location=location, use_noise=noise, device=device))
+    train_dataset_list.append(NEFGSet(df, use_dimension=True, use_location=location, use_noise=noise, device=device))
 
 for df in dataframe2:
-    test_dataset_list.append(NEFGSet(df, use_dimension=False, use_location=location, use_noise=False, device=device))
+    test_dataset_list.append(NEFGSet(df, use_dimension=True, use_location=location, use_noise=False, device=device))
 
 imgChannels = train_dataset_list[0][0][0].shape[0]
 # Split data into training and validation sets

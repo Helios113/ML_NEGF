@@ -4,7 +4,7 @@ training:
         Width: 12
         Criteria: abs_pot
         Plane: XY
-        Condition: 100%
+        Condition: ALL
         VD: ALL
         VG: ALL
         Location: ALL
@@ -13,17 +13,17 @@ training:
         Width: 3
         Criteria: abs_pot
         Plane: XY
-        Condition: 100%
+        Condition: ALL
         VD: ALL
         VG: ALL
         Location: ALL
 testing:
-    query:
+    queryThree:
         Height: 3
         Width: 6
         Criteria: abs_pot
         Plane: XY
-        Condition: 100%
+        Condition: ALL
         VD: ALL
         VG: ALL
         Location: ALL

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 main_dir= 'bailey'
-tar_dir = "bailey1"
+tar_dir = "normaliseLocation"
 cut = 0 # ZERO FOR FULL GRAPH
 
 # DATA COLLECTION
