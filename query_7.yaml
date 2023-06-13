@@ -1,0 +1,29 @@
+training:
+    query:
+        Height: 3
+        Width: 12
+        Criteria: abs_pot
+        Plane: XY
+        Condition: ALL
+        VD: ALL
+        VG: ALL
+        Location: ALL
+    queryTwo:
+        Height: 3
+        Width: 9
+        Criteria: abs_pot
+        Plane: XY
+        Condition: ALL
+        VD: ALL
+        VG: ALL
+        Location: ALL
+testing:
+    queryThree:
+        Height: 3
+        Width: 3
+        Criteria: abs_pot
+        Plane: XY
+        Condition: ALL
+        VD: ALL
+        VG: ALL
+        Location: ALL

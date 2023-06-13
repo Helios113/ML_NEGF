@@ -13,6 +13,7 @@ import random
 
 torch.manual_seed(42)
 np.random.seed(0)
+random.seed(0)
 # Instantiate the parser
 parser = argparse.ArgumentParser(description='ML_NEGF')
 

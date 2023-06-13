@@ -12,14 +12,14 @@
 #  Lines starting #$ contain directives to GE, which tell it how to run the job.
 #  Other lines starting # are comments, and are ignored by GE.
 
-#$ -N bailey10                                      # Name of the job
+#$ -N query2tests                                      # Name of the job
 #$ -q staff.q                                     # Queue in which to run job
 #$ -l mem_tokens=4G               # 1 GB memory
 #$ -cwd                           # Run in current working directory
-#$ -o bailey/bailey10/out-$JOB_ID.log             # File to which standard output should be sent, with job number in filename
-#$ -e bailey/bailey10/err-$JOB_ID.log             # File for standard error, with job nubmer in filename
+#$ -o bailey2/query7/out-$JOB_ID.log             # File to which standard output should be sent, with job number in filename
+#$ -e bailey2/query7/err-$JOB_ID.log             # File for standard error, with job nubmer in filename
 #$ -M 2564188h@student.gla.ac.uk   # Your email address
 #$ -m beas			  # The things to send you emails for: begin, end, abort, suspend
 
 source /home/staff/pa112h/spack/opt/spack/linux-centos7-zen2/gcc-9.3.0/anaconda3-2022.10-j2pawrzvhsnvudtg2pm3dutcteggzuvp/bin/activate fed.venv
-python main.py --query_path query_3.yaml --cond_data_path cond_data/dataframe_conditioned.csv --res bailey --tar pot --gpu --name bailey10 --epochs 500 --drop 0.5 --locat --noise --batch --layers 8 16 32 64 --residu 0 1 2 3
+python main.py --query_path query_2.yaml --cond_data_path cond_data/dataframe_conditioned.csv --res bailey2 --tar pot --gpu --name query7 --epochs 500 --drop 0.5 --locat --no-noise --batch --layers 8 16 32 64
