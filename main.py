@@ -200,6 +200,8 @@ print(r"{:-^30}".format("Model"), file=inf_f)
 train_loaded_list = list()
 test_loaded_list = list()
 
+print(len(train_dataset_list))
+
 for train_data in train_dataset_list:
     train_loaded_list += list(torch.utils.data.DataLoader(dataset=train_data, batch_size=batch_size,
                                         shuffle=True))
