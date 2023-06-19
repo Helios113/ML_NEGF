@@ -1,0 +1,20 @@
+training:
+    query:
+        Height: 3
+        Width: 12
+        Criteria: abs_pot
+        Plane: XY
+        Condition: 70%
+        VD: ALL
+        VG: ALL
+        Location: ALL
+testing:
+   query:
+        Height: 3
+        Width: 12
+        Criteria: abs_pot
+        Plane: XY
+        Condition: ALL
+        VD: ALL
+        VG: ALL
+        Location: ALL

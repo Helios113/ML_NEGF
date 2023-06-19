@@ -1,0 +1,31 @@
+#! /bin/bash
+
+#  Example GE submission script.
+#
+#  Date: May 2020
+#
+#  All jobs require a mem_tokens resource request, set to the approximate amount
+#  of memory required.  In the case of multi-process jobs, this is the amount
+#  of memory required by one process, not by the job as a whole.  For example,
+#  a job needing 1 GB of memory would set mem_tokens=1G below.
+#
+#  Lines starting #$ contain directives to GE, which tell it how to run the job.
+#  Other lines starting # are comments, and are ignored by GE.
+
+#$ -N query4                                     # Name of the job
+#$ -q college.q@@college-gpu                                     # Queue in which to run job
+#$ -l mem_tokens=4G               # 1 GB memory
+#$ -cwd                           # Run in current working directory
+#$ -o query4_testing/logs/out-$JOB_ID.log             # File to which standard output should be sent, with job number in filename
+#$ -e query4_testing/logs/err-$JOB_ID.log             # File for standard error, with job nubmer in filename
+#$ -M 2564188h@student.gla.ac.uk   # Your email address
+#$ -m beas			  # The things to send you emails for: begin, end, abort, suspend
+
+source /home/staff/pa112h/spack/opt/spack/linux-centos7-zen2/gcc-9.3.0/anaconda3-2022.10-j2pawrzvhsnvudtg2pm3dutcteggzuvp/bin/activate fed.venv
+# python main.py --query_path query4_testing/query.yaml --cond_data_path cond_data/dataframe_conditioned.csv --res query4_testing --tar pot --gpu --name baseline --epochs 500 --drop 0.3 --locat --no-noise --batch &&
+# python main.py --query_path query4_testing/query.yaml --cond_data_path cond_data/dataframe_conditioned.csv --res query4_testing --tar pot --gpu --name dropout5 --epochs 500 --drop 0.5 --locat --no-noise --batch &&
+# python main.py --query_path query4_testing/query.yaml --cond_data_path cond_data/dataframe_conditioned.csv --res query4_testing --tar pot --gpu --name noise --epochs 500 --drop 0.3 --locat --noise --batch &&
+# python main.py --query_path query4_testing/query.yaml --cond_data_path cond_data/dataframe_conditioned.csv --res query4_testing --tar pot --gpu --name residual --epochs 500 --drop 0.3 --locat --no-noise --batch --residu 0 1 2 3 &&
+# python main.py --query_path query4_testing/query.yaml --cond_data_path cond_data/dataframe_conditioned.csv --res query4_testing --tar pot --gpu --name layer --epochs 500 --drop 0.3 --locat --no-noise --batch --layer 16 32 64 128 &&
+python main.py --query_path query4_testing/query.yaml --cond_data_path cond_data/dataframe_conditioned.csv --res query4_testing --tar pot --gpu --name full --epochs 500 --drop 0.5 --locat --noise --batch --layer 16 32 64 128 --residu 0 1 2 3 &&
+python main.py --query_path query4_testing/query.yaml --cond_data_path cond_data/dataframe_conditioned.csv --res query4_testing --tar pot --gpu --name fullnores --epochs 500 --drop 0.5 --locat --noise --batch --layer 16 32 64 128

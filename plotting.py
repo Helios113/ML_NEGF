@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-main_dir= 'bailey'
-tar_dir = "combNorm"
-cut = 200 # ZERO FOR FULL GRAPH
+main_dir= 'query2_testing'
+tar_dir = "baseline"
+cut = 0 # ZERO FOR FULL GRAPH
 
 # DATA COLLECTION
 test_dat = pd.read_csv("/home/staff/pa112h/Projects/ML_NEGF/{}/{}/loss_test.txt".format(main_dir,tar_dir))
